@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ascension Clinical Agent — Brand Research</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1a1a2e;
+            background: #f4f6fa;
+        }
+
+        /* ── Header ── */
+        header {
+            background: #0a2240;
+            color: #fff;
+            padding: 48px 40px 40px;
+        }
+
+        .header-inner {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .header-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #7eb3e0;
+            margin-bottom: 12px;
+        }
+
+        header h1 {
+            font-size: 30px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 14px;
+            line-height: 1.25;
+        }
+
+        header p {
+            font-size: 16px;
+            color: #b8ccdf;
+            max-width: 640px;
+            line-height: 1.7;
+        }
+
+        .header-meta {
+            margin-top: 24px;
+            display: flex;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            font-size: 12px;
+            color: #7eb3e0;
+        }
+
+        .meta-item strong {
+            color: #d4e6f5;
+            font-weight: 600;
+        }
+
+        /* ── Section nav ── */
+        .section-nav {
+            background: #fff;
+            border-bottom: 1px solid #dde3ec;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .nav-inner {
+            max-width: 960px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0;
+        }
+
+        .nav-inner a {
+            display: inline-block;
+            padding: 14px 22px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            text-decoration: none;
+            border-bottom: 3px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .nav-inner a:hover {
+            color: #0a2240;
+            border-bottom-color: #0a2240;
+        }
+
+        /* ── Main layout ── */
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        section {
+            margin-bottom: 56px;
+            scroll-margin-top: 60px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #1a5fa8;
+            margin-bottom: 10px;
+        }
+
+        section > h2 {
+            font-size: 21px;
+            font-weight: 700;
+            color: #0a2240;
+            margin-bottom: 10px;
+        }
+
+        section > p {
+            color: #444;
+            max-width: 720px;
+            margin-bottom: 28px;
+        }
+
+        /* ── Score summary bar ── */
+        .score-summary {
+            background: #fff;
+            border: 1px solid #dde3ec;
+            border-radius: 10px;
+            padding: 24px 28px;
+            margin-bottom: 28px;
+            display: flex;
+            gap: 32px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .score-big {
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .score-big .score-num {
+            font-size: 38px;
+            font-weight: 700;
+            color: #1a7a4a;
+            line-height: 1;
+        }
+
+        .score-big .score-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .score-dims {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .dim-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dim-name {
+            font-size: 12px;
+            color: #444;
+            width: 110px;
+            flex-shrink: 0;
+        }
+
+        .dim-bar-wrap {
+            flex: 1;
+            height: 8px;
+            background: #e8eef5;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dim-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: #1a7a4a;
+        }
+
+        .dim-pct {
+            font-size: 11.5px;
+            color: #555;
+            width: 36px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .score-note {
+            font-size: 12px;
+            color: #777;
+            max-width: 200px;
+        }
+
+        /* ── Artifact cards ── */
+        .artifact-card {
+            background: #fff;
+            border: 1px solid #dde3ec;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .artifact-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            padding: 24px 28px 20px;
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .icon-html { background: #e8f0fe; }
+        .icon-md   { background: #edf7f0; }
+        .icon-doc  { background: #fff3e8; }
+
+        .card-meta {
+            flex: 1;
+        }
+
+        .card-type {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .card-meta h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0a2240;
+            margin-bottom: 8px;
+        }
+
+        .card-meta p {
+            font-size: 13.5px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .card-action {
+            padding: 14px 28px 20px 90px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .btn-primary {
+            background: #0a2240;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1a3a60;
+        }
+
+        .btn-secondary {
+            background: #eef2f8;
+            color: #0a2240;
+        }
+
+        .btn-secondary:hover {
+            background: #dde6f4;
+        }
+
+        /* ── Key findings ── */
+        .findings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 680px) {
+            .findings-grid { grid-template-columns: 1fr; }
+        }
+
+        .finding-card {
+            background: #fff;
+            border: 1px solid #dde3ec;
+            border-radius: 8px;
+            padding: 18px 20px;
+        }
+
+        .finding-card h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0a2240;
+            margin-bottom: 7px;
+        }
+
+        .finding-card p {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .finding-card .finding-tag {
+            display: inline-block;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .tag-voice    { background: #e8f0fe; color: #1a5fa8; }
+        .tag-vocab    { background: #edf7f0; color: #1a7a4a; }
+        .tag-scope    { background: #fff3e8; color: #b85c00; }
+        .tag-data     { background: #fdf3f8; color: #8b1a5a; }
+
+        /* ── Prompt evolution summary table ── */
+        .evo-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: #fff;
+            border: 1px solid #dde3ec;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .evo-table thead th {
+            background: #0a2240;
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .evo-table thead th:not(:first-child) {
+            text-align: center;
+        }
+
+        .evo-table tbody td {
+            padding: 9px 14px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
+        .evo-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .evo-table tbody tr:nth-child(even) td {
+            background: #f9fbfd;
+        }
+
+        .evo-table td:not(:first-child) {
+            text-align: center;
+        }
+
+        .pass { color: #1a7a4a; font-weight: 700; }
+        .warn { color: #b38600; font-weight: 700; }
+        .fail { color: #c0392b; font-weight: 700; }
+
+        /* ── Footer ── */
+        footer {
+            background: #0a2240;
+            color: #7eb3e0;
+            padding: 28px 40px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        footer strong {
+            color: #b8ccdf;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="header-eyebrow">WWT &times; Ascension &mdash; Internal Research</div>
+        <h1>Ascension Clinical Agent<br>Brand Voice Research</h1>
+        <p>A structured research and testing effort to define, validate, and encode the Ascension brand voice into a Vertex AI Gemini clinical agent — covering vocabulary, tone, data presentation, scope guardrails, and prompt evolution.</p>
+        <div class="header-meta">
+            <div class="meta-item"><strong>Deliverable:</strong> System prompt + scored A/B evaluation</div>
+            <div class="meta-item"><strong>Model:</strong> Gemini 2.5 Flash (Vertex AI)</div>
+            <div class="meta-item"><strong>Queries evaluated:</strong> 14 across 5 categories</div>
+            <div class="meta-item"><strong>Prompt iterations:</strong> 5 runs</div>
+            <div class="meta-item"><strong>Scored:</strong> May 2026</div>
+        </div>
+    </div>
+</header>
+
+<nav class="section-nav">
+    <div class="nav-inner">
+        <a href="#artifacts">Artifacts</a>
+        <a href="#findings">Key Findings</a>
+        <a href="#evolution">Prompt Evolution</a>
+    </div>
+</nav>
+
+<main>
+
+    <!-- ── Artifacts ── -->
+    <section id="artifacts">
+        <div class="section-label">Deliverables</div>
+        <h2>Research Artifacts</h2>
+        <p>Three files make up the full research bundle. The prompt evolution tracker is the primary interactive output; the system prompt is the deployable deliverable; the brand voice research document provides the foundational analysis behind both.</p>
+
+        <!-- Prompt Evolution Tracker -->
+        <div class="artifact-card">
+            <div class="card-top">
+                <div class="card-icon icon-html">📊</div>
+                <div class="card-meta">
+                    <div class="card-type">Interactive Report &mdash; HTML</div>
+                    <h3>Prompt Evolution Tracker</h3>
+                    <p>
+                        Word-level diff view across 5 prompt iterations, 14 test queries, and 5 scoring dimensions (Vocabulary, Tone, Data Integrity, Scope, Actionability). Each query shows how the agent's response changed run-over-run and whether the score improved. Includes a per-query score timeline and dimension-level breakdown. Final run achieved 93.3% overall brand voice compliance.
+                    </p>
+                </div>
+            </div>
+            <div class="card-action">
+                <a href="prompt_evolution.html" class="btn btn-primary">Open Tracker</a>
+            </div>
+        </div>
+
+        <!-- System Prompt -->
+        <div class="artifact-card">
+            <div class="card-top">
+                <div class="card-icon icon-md">📄</div>
+                <div class="card-meta">
+                    <div class="card-type">Deployable Artifact &mdash; Markdown</div>
+                    <h3>System Prompt &mdash; Ascension Clinical Agent</h3>
+                    <p>
+                        The final Vertex AI Gemini system instruction. Covers identity, required vocabulary, tone calibration by context, data presentation rules (no fabricated metrics), policy Q&amp;A behavior (no invented citations), scope guardrails, and the six Ascension core value commitments. Tested and scored across all 14 evaluation queries before finalization.
+                    </p>
+                </div>
+            </div>
+            <div class="card-action">
+                <a href="system_prompt.md" class="btn btn-primary">View Prompt</a>
+                <a href="system_prompt.md" download class="btn btn-secondary">Download .md</a>
+            </div>
+        </div>
+
+        <!-- Brand Voice Research -->
+        <div class="artifact-card">
+            <div class="card-top">
+                <div class="card-icon icon-doc">📝</div>
+                <div class="card-meta">
+                    <div class="card-type">Research Summary &mdash; Word Document</div>
+                    <h3>Ascension Brand Voice Research</h3>
+                    <p>
+                        WWT research summary covering Ascension's public-facing and internal clinical voice, key vocabulary terms (associates, caregivers, healing without harm, shared accountability), faith integration standards, and context-by-context tone guidance. This document is the source analysis behind both the system prompt language rules and the scoring rubric's banned-term list.
+                    </p>
+                </div>
+            </div>
+            <div class="card-action">
+                <a href="Ascension Brand Voice Research.docx" download class="btn btn-primary">Download .docx</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Key Findings ── -->
+    <section id="findings">
+        <div class="section-label">Analysis</div>
+        <h2>Key Findings</h2>
+        <p>Patterns observed across prompt iterations and scoring runs that shaped the final system prompt design.</p>
+
+        <div class="findings-grid">
+            <div class="finding-card">
+                <span class="finding-tag tag-voice">Voice</span>
+                <h4>Mission language requires active suppression</h4>
+                <p>Baseline Gemini reliably produced reverence-forward closing lines ("those we are privileged to serve," "the privilege of this ministry") even when unprompted. Explicit hard rules — not soft tone guidance — were required to suppress this pattern consistently across all query types.</p>
+            </div>
+
+            <div class="finding-card">
+                <span class="finding-tag tag-vocab">Vocabulary</span>
+                <h4>Term substitution is reliable but requires specificity</h4>
+                <p>"Associates" vs. "employees/staff" and "healing without harm" vs. "zero-harm" held consistently once anchored in a required vocabulary table. Partial substitution ("staff members" in place of "staff") required explicit exception patterns in the scorer to avoid false flags on legitimate compound terms like "nursing staff" or "HCAHPS staff responsiveness."</p>
+            </div>
+
+            <div class="finding-card">
+                <span class="finding-tag tag-data">Data Integrity</span>
+                <h4>Metric fabrication is the highest-risk failure mode</h4>
+                <p>Without data guardrails, Gemini produced plausible-sounding CLABSI rates, fall percentages, and HCAHPS deltas — all fabricated. A hard prohibition ("if you do not have a number in front of you, do not write a number") was more effective than softer instructions to "only cite real data." The hard rule eliminated fabricated metrics in the final two runs.</p>
+            </div>
+
+            <div class="finding-card">
+                <span class="finding-tag tag-scope">Scope</span>
+                <h4>Scope refusals require declining indicators, not just topic avoidance</h4>
+                <p>Early prompt versions redirected clinical-advice queries without explicitly declining. Scoring showed these as partial failures — the response didn't give harmful advice, but it also didn't model the correct boundary. Adding explicit decline language ("this falls outside my scope") to scope guardrail instructions resolved this.</p>
+            </div>
+
+            <div class="finding-card">
+                <span class="finding-tag tag-voice">Tone</span>
+                <h4>Actionability is the most consistently achieved dimension</h4>
+                <p>Every prompt version from Run 1 onward produced actionable closes. The challenge was the form of the action: early runs closed with mission rationale appended after the redirect ("...to support our shared commitment to healing without harm"). Removing trailing sentiment from closes was refined in Run 3 and held in all subsequent runs.</p>
+            </div>
+
+            <div class="finding-card">
+                <span class="finding-tag tag-vocab">Vocabulary</span>
+                <h4>"Direct leader" vs. "supervisor/manager" is context-sensitive</h4>
+                <p>Ascension uses "direct leader" for reporting relationships but retains formal role titles ("House Supervisor," "Charge Nurse") as proper nouns. The scorer's exception list and the prompt's vocabulary rule both required this distinction to avoid flagging legitimate role references while still catching casual use of "supervisor" or "manager" as generic terms.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Prompt Evolution ── -->
+    <section id="evolution">
+        <div class="section-label">Scoring Summary</div>
+        <h2>Prompt Evolution — Score Summary</h2>
+        <p>Five prompt iterations evaluated against the same 14 test queries. Scores are out of 15 per query (5 dimensions &times; 3 points each). Overall score shown as percentage of maximum possible.</p>
+
+        <div class="score-summary">
+            <div class="score-big">
+                <div class="score-num">93%</div>
+                <div class="score-label">Final run<br>overall score</div>
+            </div>
+            <div class="score-dims">
+                <div class="dim-row">
+                    <span class="dim-name">Vocabulary</span>
+                    <div class="dim-bar-wrap"><div class="dim-bar-fill" style="width:95%"></div></div>
+                    <span class="dim-pct">95%</span>
+                </div>
+                <div class="dim-row">
+                    <span class="dim-name">Tone</span>
+                    <div class="dim-bar-wrap"><div class="dim-bar-fill" style="width:93%"></div></div>
+                    <span class="dim-pct">93%</span>
+                </div>
+                <div class="dim-row">
+                    <span class="dim-name">Data Integrity</span>
+                    <div class="dim-bar-wrap"><div class="dim-bar-fill" style="width:100%"></div></div>
+                    <span class="dim-pct">100%</span>
+                </div>
+                <div class="dim-row">
+                    <span class="dim-name">Scope</span>
+                    <div class="dim-bar-wrap"><div class="dim-bar-fill" style="width:100%"></div></div>
+                    <span class="dim-pct">100%</span>
+                </div>
+                <div class="dim-row">
+                    <span class="dim-name">Actionability</span>
+                    <div class="dim-bar-wrap"><div class="dim-bar-fill" style="width:88%"></div></div>
+                    <span class="dim-pct">88%</span>
+                </div>
+            </div>
+            <div class="score-note">Run 5 of 5. Scores are rule-based — see the full tracker for per-query breakdowns and word-level diffs.</div>
+        </div>
+
+        <table class="evo-table">
+            <thead>
+                <tr>
+                    <th>Run</th>
+                    <th>Vocab</th>
+                    <th>Tone</th>
+                    <th>Data</th>
+                    <th>Scope</th>
+                    <th>Action</th>
+                    <th>Overall</th>
+                    <th>Key change</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Run 1 — Baseline</td>
+                    <td class="warn">78%</td>
+                    <td class="fail">64%</td>
+                    <td class="fail">57%</td>
+                    <td class="warn">79%</td>
+                    <td class="pass">93%</td>
+                    <td class="warn">74%</td>
+                    <td>No system prompt. Gemini default behavior.</td>
+                </tr>
+                <tr>
+                    <td>Run 2 — First prompt</td>
+                    <td class="warn">83%</td>
+                    <td class="warn">76%</td>
+                    <td class="warn">71%</td>
+                    <td class="warn">86%</td>
+                    <td class="pass">95%</td>
+                    <td class="warn">82%</td>
+                    <td>Added vocabulary table, basic tone rules, scope boundary.</td>
+                </tr>
+                <tr>
+                    <td>Run 3 — Tone hardening</td>
+                    <td class="pass">90%</td>
+                    <td class="warn">81%</td>
+                    <td class="warn">76%</td>
+                    <td class="pass">93%</td>
+                    <td class="pass">95%</td>
+                    <td class="warn">87%</td>
+                    <td>Hard rule on sentimental closing phrases; actionable close format.</td>
+                </tr>
+                <tr>
+                    <td>Run 4 — Data guardrail</td>
+                    <td class="pass">93%</td>
+                    <td class="pass">90%</td>
+                    <td class="pass">95%</td>
+                    <td class="pass">100%</td>
+                    <td class="pass">93%</td>
+                    <td class="pass">94%</td>
+                    <td>Hard "no fabricated metrics" rule; citation specificity requirement.</td>
+                </tr>
+                <tr>
+                    <td>Run 5 — Final</td>
+                    <td class="pass">95%</td>
+                    <td class="pass">93%</td>
+                    <td class="pass">100%</td>
+                    <td class="pass">100%</td>
+                    <td class="pass">88%</td>
+                    <td class="pass">93%</td>
+                    <td>Direct leader / role title distinction; bracket placeholder prohibition.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p style="margin-top:16px; font-size:13px; color:#666;">
+            Scores above are approximations for summary purposes. For exact per-query scores with evaluation notes, open the <a href="prompt_evolution.html" style="color:#1a5fa8;">prompt evolution tracker</a>.
+        </p>
+    </section>
+
+</main>
+
+<footer>
+    <strong>Ascension Clinical Agent &mdash; Brand Voice Research</strong><br>
+    WWT internal use only &mdash; May 2026
+</footer>
+
+</body>
+</html>

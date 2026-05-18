@@ -4,7 +4,7 @@
 
 A structured research and testing effort to define, validate, and encode the Ascension brand voice into a Vertex AI Gemini clinical agent. Covers vocabulary, tone, data presentation rules, scope guardrails, and iterative prompt refinement across five evaluation runs.
 
-**[View the full research report →](https://kevin-freitas-wwt.github.io/agent-brand-research/)**
+**[View the full research report →](https://wwtdigital.github.io/agent-brand-research/)**
 
 ---
 
@@ -12,9 +12,9 @@ A structured research and testing effort to define, validate, and encode the Asc
 
 | File | Description |
 |---|---|
-| [`index.html`](https://kevin-freitas-wwt.github.io/agent-brand-research/) | Landing page — project summary, key findings, and links to all artifacts |
-| [`prompt_evolution.html`](https://kevin-freitas-wwt.github.io/agent-brand-research/prompt_evolution.html) | Interactive prompt evolution tracker — word-level diffs, per-query scores across 5 runs |
-| [`system_prompt.md`](https://kevin-freitas-wwt.github.io/agent-brand-research/system_prompt.md) | Final Ascension Clinical Agent system instruction (Vertex AI Gemini format) |
+| [`index.html`](https://wwtdigital.github.io/agent-brand-research/) | Landing page — project summary, key findings, and links to all artifacts |
+| [`prompt_evolution.html`](https://wwtdigital.github.io/agent-brand-research/prompt_evolution.html) | Interactive prompt evolution tracker — word-level diffs, per-query scores across 5 runs |
+| [`system_prompt.md`](https://wwtdigital.github.io/agent-brand-research/system_prompt.md) | Final Ascension Clinical Agent system instruction (Vertex AI Gemini format) |
 | `Ascension Brand Voice Research.docx` | WWT brand voice research — public vs. clinical voice, vocabulary, tone by context |
 
 ---
@@ -31,7 +31,7 @@ The agent's brand voice compliance score across 14 test queries improved from **
 | Run 4 — Data guardrail | 93% | 90% | 95% | 100% | 93% | **94%** |
 | Run 5 — Final | 95% | 93% | 100% | 100% | 88% | **93%** |
 
-Scores are rule-based across five dimensions (3 pts each, 15 max per query). See the [prompt evolution tracker](https://kevin-freitas-wwt.github.io/agent-brand-research/prompt_evolution.html) for per-query breakdowns and word-level response diffs.
+Scores are rule-based across five dimensions (3 pts each, 15 max per query). See the [prompt evolution tracker](https://wwtdigital.github.io/agent-brand-research/prompt_evolution.html) for per-query breakdowns and word-level response diffs.
 
 ### What drove the score improvements
 

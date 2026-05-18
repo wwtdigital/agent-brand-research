@@ -423,9 +423,9 @@
     <div class="header-inner">
         <div class="header-eyebrow">WWT &times; Ascension &mdash; Internal Research</div>
         <h1>Ascension Clinical Agent<br>Brand Voice Research</h1>
-        <p>A structured research and testing effort to define, validate, and encode the Ascension brand voice into a Vertex AI Gemini clinical agent — covering vocabulary, tone, data presentation, scope guardrails, and prompt evolution.</p>
+        <p>A structured research and build effort to define, validate, and encode the Ascension brand voice into a Vertex AI Gemini clinical agent — from foundational brand research through a branded UI skin, system prompt, and scored prompt evolution testing.</p>
         <div class="header-meta">
-            <div class="meta-item"><strong>Deliverable:</strong> System prompt + scored A/B evaluation</div>
+            <div class="meta-item"><strong>Deliverables:</strong> UI skin + system prompt + scored A/B evaluation</div>
             <div class="meta-item"><strong>Model:</strong> Gemini 2.5 Flash (Vertex AI)</div>
             <div class="meta-item"><strong>Queries evaluated:</strong> 14 across 5 categories</div>
             <div class="meta-item"><strong>Prompt iterations:</strong> 5 runs</div>
@@ -437,6 +437,7 @@
 <nav class="section-nav">
     <div class="nav-inner">
         <a href="#artifacts">Artifacts</a>
+        <a href="#ui-skin">UI Skin</a>
         <a href="#findings">Key Findings</a>
         <a href="#evolution">Prompt Evolution</a>
     </div>
@@ -448,7 +449,24 @@
     <section id="artifacts">
         <div class="section-label">Deliverables</div>
         <h2>Research Artifacts</h2>
-        <p>Three files make up the full research bundle. The prompt evolution tracker is the primary interactive output; the system prompt is the deployable deliverable; the brand voice research document provides the foundational analysis behind both.</p>
+        <p>Four files make up the full research bundle. The clinical AI interface is the front-end deliverable that wraps the agent in Ascension's visual identity; the prompt evolution tracker documents how the system prompt was tested and refined; the system prompt is the deployable Vertex AI instruction; and the brand voice research document is the foundational analysis behind all three.</p>
+
+        <!-- Clinical AI UI Skin -->
+        <div class="artifact-card">
+            <div class="card-top">
+                <div class="card-icon icon-html">🏥</div>
+                <div class="card-meta">
+                    <div class="card-type">UI Prototype &mdash; HTML</div>
+                    <h3>Ascension Clinical AI — Vertex AI Interface Skin</h3>
+                    <p>
+                        A branded chat interface that wraps the Vertex AI Gemini clinical agent in Ascension's visual identity. The skin applies Ascension's exact brand color tokens (Primary Blue #1B4297 / Pantone 286, Teal #009498 / Pantone 321, Violet #B40F87 / Pantone 248) across a full chat UI: persistent conversation sidebar, associate-facing disclaimer banner, AI scope notice, quick-start clinical prompt cards, and a sidebar footer that surfaces the Google Cloud / Vertex AI attribution. The intent is to replace the default Vertex AI Agent Builder chat surface with an experience that reads as a native Ascension internal tool — not a generic AI chatbot.
+                    </p>
+                </div>
+            </div>
+            <div class="card-action">
+                <a href="ascension-clinical-ai.html" class="btn btn-primary">Open UI Prototype</a>
+            </div>
+        </div>
 
         <!-- Prompt Evolution Tracker -->
         <div class="artifact-card">
@@ -501,6 +519,41 @@
                 <a href="Ascension Brand Voice Research.docx" download class="btn btn-primary">Download .docx</a>
             </div>
         </div>
+    </section>
+
+    <!-- ── UI Skin ── -->
+    <section id="ui-skin">
+        <div class="section-label">Front-End Deliverable</div>
+        <h2>Vertex AI Interface Skin</h2>
+        <p>The clinical AI interface replaces the default Vertex AI Agent Builder chat surface with a fully Ascension-branded experience — so associates interact with a tool that reads as native to Ascension, not a generic AI product.</p>
+
+        <div class="findings-grid" style="margin-bottom:20px;">
+            <div class="finding-card">
+                <span class="finding-tag tag-voice">Brand Identity</span>
+                <h4>Ascension color system applied end-to-end</h4>
+                <p>The skin uses Ascension's exact Pantone-matched tokens: Primary Blue (#1B4297 / Pantone 286) for the header and primary actions, Teal (#009498 / Pantone 321) for accent badges and confirm actions, and Violet (#B40F87 / Pantone 248) reserved for system-level state. Background and border tones are drawn from Ascension's neutral palette, not generic grays.</p>
+            </div>
+
+            <div class="finding-card">
+                <span class="finding-tag tag-scope">Clinical Context</span>
+                <h4>Disclaimer and scope notice built into the chrome</h4>
+                <p>A persistent amber disclaimer banner below the header surfaces the agent's clinical scope boundary on every session — no associate can miss it. A dismissible blue config notice can prompt associates to connect the agent to their facility's policy system. Both are structural UI elements, not chat messages, so they cannot be cleared or dismissed by the conversation.</p>
+            </div>
+
+            <div class="finding-card">
+                <span class="finding-tag tag-vocab">Onboarding</span>
+                <h4>Quick-start cards replace a blank prompt field</h4>
+                <p>The welcome state surfaces four clinical prompt categories as tappable cards — Policy &amp; Procedure, Clinical Quality Data, Medication Safety, and Patient Rights — so associates land on a screen that communicates the agent's capabilities before they type anything. Each card pre-fills a representative query, lowering the barrier to first use.</p>
+            </div>
+
+            <div class="finding-card">
+                <span class="finding-tag tag-data">Attribution</span>
+                <h4>Vertex AI / Google Cloud surfaced, not hidden</h4>
+                <p>The sidebar footer explicitly labels the underlying infrastructure ("Powered by Google Cloud · Vertex AI Gemini") with a chip-style badge. This is intentional: Ascension's AI governance framework requires transparency about AI systems, and the skin reflects that. The branding is Ascension's; the attribution is Google Cloud's.</p>
+            </div>
+        </div>
+
+        <a href="ascension-clinical-ai.html" class="btn btn-primary" style="display:inline-block; margin-top:4px;">Open UI Prototype →</a>
     </section>
 
     <!-- ── Key Findings ── -->

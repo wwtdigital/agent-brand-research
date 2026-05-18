@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascension Clinical AI Assistant</title>
+<style>
+/* ── Ascension Brand Tokens ─────────────────────────────────────────── */
+:root {
+  --blue:        #1B4297;   /* Ascension Primary Blue  (Pantone 286) */
+  --blue-mid:    #1E69D2;   /* Medium Blue             (Pantone 285) */
+  --blue-light:  #EEF2FF;
+  --teal:        #009498;   /* Ascension Teal/Green    (Pantone 321) */
+  --teal-dark:   #007a7d;
+  --violet:      #B40F87;   /* Ascension Violet        (Pantone 248) */
+  --bg:          #F4F6FA;
+  --white:       #FFFFFF;
+  --text:        #1A2035;
+  --text-mid:    #4A5568;
+  --text-light:  #718096;
+  --border:      #E2E8F0;
+  --shadow-sm:   0 1px 4px rgba(27,66,151,.08);
+  --shadow:      0 2px 12px rgba(27,66,151,.10);
+  --shadow-lg:   0 8px 32px rgba(27,66,151,.14);
+  --radius:      10px;
+}
+
+/* ── Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 14px;
+}
+a { color: var(--blue); }
+button { font-family: inherit; }
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+.header {
+  background: var(--blue);
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,.18);
+  z-index: 50;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+}
+
+.header-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 5px 13px; border-radius: 20px;
+}
+.header-pill .badge {
+  background: var(--teal); color: white;
+  font-size: 9px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px;
+  letter-spacing: .6px; text-transform: uppercase;
+}
+.header-pill span { color: white; font-size: 12px; font-weight: 500; opacity: .95; }
+
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.hbtn {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.13);
+  border: 1px solid rgba(255,255,255,.2);
+  color: white; border-radius: 7px;
+  padding: 6px 12px; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: background .2s;
+}
+.hbtn:hover { background: rgba(255,255,255,.24); }
+.hbtn.accent { background: var(--teal); border-color: var(--teal); }
+.hbtn.accent:hover { background: var(--teal-dark); border-color: var(--teal-dark); }
+
+/* ── Layout ─────────────────────────────────────────────────────────── */
+.layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar {
+  width: 252px; flex-shrink: 0;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-top { padding: 14px; border-bottom: 1px solid var(--border); }
+.new-btn {
+  width: 100%; background: var(--blue); color: white;
+  border: none; padding: 9px 14px; border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: background .2s;
+}
+.new-btn:hover { background: #153680; }
+
+.sidebar-section { padding: 12px 14px 4px; }
+.sec-label {
+  font-size: 10px; font-weight: 700; color: var(--text-light);
+  text-transform: uppercase; letter-spacing: 1.1px; margin-bottom: 6px;
+}
+.hist-item {
+  padding: 8px 10px; border-radius: 6px;
+  font-size: 12px; color: var(--text-mid);
+  cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: background .15s;
+}
+.hist-item:hover { background: var(--bg); }
+.hist-item.active { background: var(--blue-light); color: var(--blue); font-weight: 500; }
+
+.sidebar-footer {
+  margin-top: auto; padding: 14px;
+  border-top: 1px solid var(--border);
+}
+.powered {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; color: var(--text-light); margin-bottom: 6px;
+}
+.gcp-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 3px 8px; border-radius: 5px;
+  font-size: 11px; font-weight: 500; color: var(--text-mid);
+}
+.sidebar-footer .note { font-size: 10px; color: var(--text-light); line-height: 1.5; margin-top: 4px; }
+
+/* ── Main ─────────────────────────────────────────────────────────────── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* disclaimer */
+.disclaimer {
+  background: #FFFBEB; border-bottom: 1px solid #FDE68A;
+  padding: 7px 18px; font-size: 11.5px; color: #92400E;
+  display: flex; align-items: center; gap: 7px; flex-shrink: 0;
+}
+
+/* config notice */
+.cfg-notice {
+  background: #EFF6FF; border-bottom: 1px solid #BFDBFE;
+  padding: 8px 18px; font-size: 12px; color: #1E40AF;
+  display: none; flex-shrink: 0; align-items: center; gap: 6px;
+}
+.cfg-notice.show { display: flex; }
+.cfg-notice a { font-weight: 600; }
+
+/* messages */
+.msgs {
+  flex: 1; overflow-y: auto;
+  padding: 22px 16px; display: flex; flex-direction: column; gap: 18px;
+}
+
+/* welcome */
+.welcome {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%; gap: 28px; padding: 32px 16px;
+}
+.welcome-icon {
+  width: 68px; height: 68px;
+  background: linear-gradient(135deg, var(--blue), var(--blue-mid));
+  border-radius: 18px; box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+}
+.welcome h2 { font-size: 21px; font-weight: 700; color: var(--blue); }
+.welcome p  { font-size: 13px; color: var(--text-mid); text-align: center; max-width: 420px; line-height: 1.65; }
+
+.quick-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px;
+  width: 100%; max-width: 580px;
+}
+.qcard {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 13px 15px;
+  cursor: pointer; transition: all .18s; text-align: left;
+}
+.qcard:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-1px); }
+.qcard-icon { font-size: 20px; margin-bottom: 7px; }
+.qcard-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.qcard-desc  { font-size: 11px; color: var(--text-light); line-height: 1.4; }
+
+/* message rows */
+.msg { display: flex; gap: 10px; max-width: 800px; width: 100%; margin: 0 auto; }
+.msg.user { flex-direction: row-reverse; }
+
+.avatar {
+  width: 33px; height: 33px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+}
+.msg.assistant .avatar { background: linear-gradient(135deg, var(--blue), var(--blue-mid)); color: white; }
+.msg.user      .avatar { background: var(--teal); color: white; font-size: 11px; }
+
+.msg-body { flex: 1; min-width: 0; }
+.msg-sender {
+  font-size: 10px; font-weight: 700; color: var(--text-light);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+}
+.msg.user .msg-sender { text-align: right; }
+
+.bubble {
+  padding: 12px 16px; border-radius: 12px;
+  font-size: 13.5px; line-height: 1.68;
+}
+.msg.assistant .bubble {
+  background: var(--white); border: 1px solid var(--border);
+  border-top-left-radius: 4px; box-shadow: var(--shadow-sm);
+  color: var(--text);
+}
+.msg.user .bubble {
+  background: var(--blue); color: white;
+  border-top-right-radius: 4px;
+}
+.bubble p           { margin-bottom: 9px; }
+.bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { padding-left: 18px; margin-bottom: 9px; }
+.bubble li          { margin-bottom: 4px; }
+.bubble strong      { font-weight: 600; }
+.bubble h3, .bubble h4 {
+  font-size: 13.5px; font-weight: 700; color: var(--blue);
+  margin: 12px 0 5px;
+}
+.bubble code {
+  background: #F1F5F9; padding: 1px 5px; border-radius: 3px;
+  font-family: 'Menlo', 'Consolas', monospace; font-size: 12px;
+}
+.msg-time {
+  font-size: 10px; color: var(--text-light); margin-top: 4px;
+}
+.msg.user .msg-time { text-align: right; }
+
+/* typing */
+.typing-wrap .bubble {
+  padding: 11px 15px;
+}
+.typing-dots { display: flex; align-items: center; gap: 4px; }
+.dot {
+  width: 7px; height: 7px; background: var(--blue);
+  border-radius: 50%; opacity: .55;
+  animation: bounce 1.2s infinite;
+}
+.dot:nth-child(2) { animation-delay: .2s; }
+.dot:nth-child(3) { animation-delay: .4s; }
+@keyframes bounce {
+  0%,60%,100% { transform: translateY(0); }
+  30%         { transform: translateY(-6px); opacity: 1; }
+}
+
+/* error bubble */
+.err-bubble {
+  background: #FEF2F2; border: 1px solid #FECACA;
+  border-radius: var(--radius); padding: 11px 15px;
+  font-size: 13px; color: #B91C1C;
+}
+
+/* input */
+.input-wrap { padding: 12px 16px 18px; flex-shrink: 0; }
+.input-box {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 12px; box-shadow: var(--shadow);
+  max-width: 800px; margin: 0 auto;
+  transition: border-color .2s, box-shadow .2s;
+}
+.input-box:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(27,66,151,.10), var(--shadow);
+}
+.input-row {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 11px 13px 9px;
+}
+textarea#inp {
+  flex: 1; border: none; outline: none; resize: none;
+  font-family: inherit; font-size: 13.5px; line-height: 1.5;
+  color: var(--text); background: transparent;
+  min-height: 22px; max-height: 150px; overflow-y: auto;
+}
+textarea#inp::placeholder { color: var(--text-light); }
+.send {
+  background: var(--blue); color: white;
+  border: none; width: 35px; height: 35px; border-radius: 8px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background .2s;
+}
+.send:hover   { background: #153680; }
+.send:disabled{ background: var(--border); cursor: not-allowed; }
+.input-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 13px 10px; border-top: 1px solid var(--border);
+}
+.ibar-btns { display: flex; gap: 2px; }
+.ibar-btn {
+  display: flex; align-items: center; gap: 4px;
+  background: none; border: none; color: var(--text-light);
+  padding: 4px 8px; border-radius: 5px; font-size: 11px;
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.ibar-btn:hover { background: var(--bg); color: var(--text-mid); }
+.hint { font-size: 10.5px; color: var(--text-light); }
+
+/* ── Modal ───────────────────────────────────────────────────────────── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.45); z-index: 200;
+  align-items: center; justify-content: center;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--white); border-radius: 14px;
+  width: 510px; max-width: 96vw; max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,.22);
+}
+.modal-hd {
+  background: var(--blue); color: white;
+  padding: 17px 20px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 1;
+}
+.modal-hd h2 { font-size: 15px; font-weight: 600; }
+.modal-x {
+  background: none; border: none; color: white;
+  font-size: 20px; cursor: pointer; opacity: .8;
+  padding: 1px 5px; border-radius: 4px; line-height: 1;
+}
+.modal-x:hover { opacity: 1; background: rgba(255,255,255,.15); }
+.modal-body { padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+.fgroup label {
+  display: block; font-size: 11px; font-weight: 700; color: var(--text-mid);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+}
+.finput {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 9px 11px; font-size: 13px; font-family: inherit;
+  color: var(--text); outline: none; transition: border-color .2s;
+}
+.finput:focus { border-color: var(--blue); }
+.ftextarea { min-height: 110px; resize: vertical; line-height: 1.5; }
+.fhint { font-size: 11px; color: var(--text-light); margin-top: 4px; line-height: 1.5; }
+.modal-ft {
+  padding: 14px 22px; background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex; gap: 9px; justify-content: flex-end;
+  position: sticky; bottom: 0;
+}
+.btn { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .2s; }
+.btn-p { background: var(--blue); color: white; }
+.btn-p:hover { background: #153680; }
+.btn-s { background: var(--white); border: 1.5px solid var(--border); color: var(--text-mid); }
+.btn-s:hover { background: var(--bg); }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #A0AEC0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HEADER ═════════════════════════════ -->
+<header class="header">
+  <a class="logo" href="#">
+    <img id="ascension-logo"
+         src="https://about.ascension.org/-/media/project/ascension/healthcare/component-library/logos/ascension-logo.svg"
+         alt="Ascension"
+         style="height:30px;width:auto;filter:brightness(0) invert(1);">
+  </a>
+
+  <div class="header-pill">
+    <span class="badge">Vertex AI</span>
+    <span>Clinical AI Assistant</span>
+  </div>
+
+  <div class="header-actions">
+    <button class="hbtn" onclick="openSettings()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Configure
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════ LAYOUT ════════════════════════════ -->
+<div class="layout">
+
+  <!-- ── Sidebar ────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <button class="new-btn" onclick="newChat()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Conversation
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sec-label">Recent</div>
+      <div id="history">
+        <div class="hist-item active">Current session</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="powered">
+        Powered by
+        <span class="gcp-chip">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="#4285F4"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          Google Vertex AI
+        </span>
+      </div>
+      <div class="note" id="modelLabel">Model: gemini-2.5-flash</div>
+      <div class="note" style="margin-top:5px">For clinical decision support only. Always apply professional clinical judgment.</div>
+    </div>
+  </aside>
+
+  <!-- ── Main ───────────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- disclaimer -->
+    <div class="disclaimer">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <strong>Clinical AI Notice:</strong>&nbsp; Output is for informational support only. Verify with clinical judgment and current guidelines before acting.
+    </div>
+
+    <!-- config notice -->
+    <div class="cfg-notice" id="cfgNotice">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Configuration required &mdash; enter your GCP Project ID and bearer token in
+      <a href="#" onclick="openSettings();return false;">Configure</a> to activate the assistant.
+    </div>
+
+    <!-- messages -->
+    <div class="msgs" id="msgs">
+      <!-- welcome injected by JS -->
+    </div>
+
+    <!-- input -->
+    <div class="input-wrap">
+      <div class="input-box">
+        <div class="input-row">
+          <textarea id="inp" placeholder="Ask a clinical question…" rows="1"
+            onkeydown="handleKey(event)" oninput="grow(this)"></textarea>
+          <button class="send" id="sendBtn" onclick="send()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-bar">
+          <div class="ibar-btns">
+            <button class="ibar-btn" onclick="clearInp()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+              Clear
+            </button>
+            <button class="ibar-btn" onclick="openSettings()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              GCP Token
+            </button>
+          </div>
+          <span class="hint">Shift+Enter for new line · Enter to send</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════ MODAL ═════════════════════════════ -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2>Configure Vertex AI Connection</h2>
+      <button class="modal-x" onclick="closeSettings()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- How-to banner -->
+      <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:12px 14px;font-size:12px;color:#1E40AF;line-height:1.65">
+        <strong>🔐 How to get your access token from GCP:</strong><br>
+        Run this in your terminal (requires <a href="https://cloud.google.com/sdk/gcloud" target="_blank" style="color:#1d4ed8">gcloud CLI</a>):<br>
+        <code style="background:#DBEAFE;padding:4px 8px;border-radius:4px;display:inline-block;margin-top:6px;font-size:11px;letter-spacing:.2px">gcloud auth print-access-token</code><br><br>
+        Tokens expire after <strong>60 minutes</strong> — re-run the command and paste the new token here if you see auth errors.
+        For production, use a service account with the <code style="background:#DBEAFE;padding:1px 5px;border-radius:3px">roles/aiplatform.user</code> role.
+      </div>
+
+      <div class="fgroup">
+        <label>GCP Project ID</label>
+        <input type="text" class="finput" id="projectInput" placeholder="my-gcp-project-id">
+        <p class="fhint">Your Google Cloud project ID (not the project number). Find it in the <a href="https://console.cloud.google.com" target="_blank">GCP Console</a> dashboard header.</p>
+      </div>
+
+      <div class="fgroup">
+        <label>Region</label>
+        <select class="finput" id="regionInput">
+          <option value="us-central1">us-central1 — Iowa (recommended)</option>
+          <option value="us-east4">us-east4 — N. Virginia</option>
+          <option value="us-west1">us-west1 — Oregon</option>
+          <option value="europe-west4">europe-west4 — Netherlands</option>
+          <option value="asia-northeast1">asia-northeast1 — Tokyo</option>
+        </select>
+      </div>
+
+      <div class="fgroup">
+        <label>Bearer Token (from <code style="font-size:11px">gcloud auth print-access-token</code>)</label>
+        <input type="password" class="finput" id="keyInput" placeholder="ya29.a0A…">
+        <p class="fhint">Paste your access token above. It is stored in browser <code>localStorage</code> for convenience — use a private/incognito window on shared machines.</p>
+      </div>
+
+      <div class="fgroup">
+        <label>Model</label>
+        <select class="finput" id="modelInput">
+          <option value="gemini-2.5-flash">gemini-2.5-flash — Recommended (fast, latest stable)</option>
+          <option value="gemini-2.5-pro">gemini-2.5-pro — Most capable (slower, higher cost)</option>
+          <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite — Lightweight / high volume</option>
+          <option value="gemini-2.0-flash-001">gemini-2.0-flash-001 — Existing customers only (pre-Mar 2026 projects)</option>
+        </select>
+        <p class="fhint">Models <code>gemini-1.5-*</code> are retired and <code>gemini-2.0-flash-001</code> is restricted to pre-March 2026 projects. Use <code>gemini-2.5-flash</code> for new projects. Verify availability in <a href="https://console.cloud.google.com/vertex-ai/model-garden" target="_blank">Vertex AI Model Garden</a>.</p>
+      </div>
+
+      <div class="fgroup">
+        <label>System Prompt (Clinical Context)</label>
+        <textarea class="finput ftextarea" id="sysInput"></textarea>
+        <p class="fhint">This prompt is sent with every request to scope the assistant's behavior.</p>
+      </div>
+
+      <div class="fgroup">
+        <label>Clinician Initials (shown in chat)</label>
+        <input type="text" class="finput" id="initialsInput" placeholder="e.g. MD" maxlength="3">
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-s" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-p" onclick="saveSettings()">Save &amp; Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SCRIPT ════════════════════════════ -->
+<script>
+// ── Defaults ──────────────────────────────────────────────────────────
+const DEFAULT_SYSTEM = `You are Ascension's Clinical AI Assistant, powered by Google Vertex AI. You support clinicians with evidence-based medical information including drug interactions, clinical protocols, care pathways, and diagnostic criteria.
+
+Guidelines:
+- Always note that AI-generated content should be verified with professional clinical judgment and current guidelines before acting
+- Cite relevant guidelines or evidence bodies when applicable (AHA, ACC, IDSA, Surviving Sepsis, UpToDate, etc.)
+- Use clear, professional clinical language
+- Do not diagnose individual patients or replace clinical decision-making
+- Flag safety concerns, contraindications, and black-box warnings prominently
+- For medication questions, include: indication, dosing overview, contraindications, major interactions, and monitoring parameters when relevant
+- Use structured responses with headers and bullet points for readability`;
+
+// ── State ──────────────────────────────────────────────────────────────
+let history = []; // [{role, parts:[{text}]}]
+let busy = false;
+let cfg = {
+  key:      localStorage.getItem('asc_key')      || '',
+  project:  localStorage.getItem('asc_project')  || '',
+  region:   localStorage.getItem('asc_region')   || 'us-central1',
+  model:    localStorage.getItem('asc_model')    || 'gemini-2.5-flash',
+  sys:      localStorage.getItem('asc_sys')      || DEFAULT_SYSTEM,
+  initials: localStorage.getItem('asc_initials') || 'MD',
+};
+
+// ── Boot ───────────────────────────────────────────────────────────────
+(function init() {
+  document.getElementById('keyInput').value      = cfg.key;
+  document.getElementById('projectInput').value  = cfg.project;
+  document.getElementById('regionInput').value   = cfg.region;
+  document.getElementById('modelInput').value    = cfg.model;
+  document.getElementById('sysInput').value      = cfg.sys;
+  document.getElementById('initialsInput').value = cfg.initials;
+  syncUI();
+  if (!cfg.key || !cfg.project) openSettings();
+  renderWelcome();
+})();
+
+function syncUI() {
+  const ready = !!(cfg.key && cfg.project);
+  document.getElementById('cfgNotice').classList.toggle('show', !ready);
+  document.getElementById('modelLabel').textContent = 'Model: ' + cfg.model;
+}
+
+// ── Settings ───────────────────────────────────────────────────────────
+function openSettings()  { document.getElementById('overlay').classList.add('open'); }
+function closeSettings() { document.getElementById('overlay').classList.remove('open'); }
+function saveSettings() {
+  cfg.key      = document.getElementById('keyInput').value.trim();
+  cfg.project  = document.getElementById('projectInput').value.trim();
+  cfg.region   = document.getElementById('regionInput').value;
+  cfg.model    = document.getElementById('modelInput').value;
+  cfg.sys      = document.getElementById('sysInput').value;
+  cfg.initials = document.getElementById('initialsInput').value.trim() || 'MD';
+  localStorage.setItem('asc_key',      cfg.key);
+  localStorage.setItem('asc_project',  cfg.project);
+  localStorage.setItem('asc_region',   cfg.region);
+  localStorage.setItem('asc_model',    cfg.model);
+  localStorage.setItem('asc_sys',      cfg.sys);
+  localStorage.setItem('asc_initials', cfg.initials);
+  syncUI();
+  closeSettings();
+}
+
+// ── Welcome ────────────────────────────────────────────────────────────
+const QUICK = [
+  { icon:'💊', title:'Drug Interactions',   desc:'Review key interactions & contraindications', q:'What are the most clinically significant drug-drug interactions I should watch for with warfarin? Include foods and reversal agents.' },
+  { icon:'📋', title:'Clinical Guidelines', desc:'Summarize latest evidence-based protocols',   q:'Summarize the current AHA/ACC guidelines for acute STEMI management, including reperfusion strategy and adjunct therapy.' },
+  { icon:'🏥', title:'Sepsis Bundle',        desc:'Surviving Sepsis Hour-1 Bundle',              q:'What is the Surviving Sepsis Campaign Hour-1 Bundle? Provide each element with the rationale.' },
+  { icon:'🔬', title:'Clinical Reference',  desc:'Diagnoses, scoring, risk stratification',     q:'Explain the CURB-65 scoring system for community-acquired pneumonia — criteria, score interpretation, and disposition guidance.' },
+];
+
+function renderWelcome() {
+  const cards = QUICK.map(c => `
+    <div class="qcard" onclick="quickSend(${JSON.stringify(c.q)})">
+      <div class="qcard-icon">${c.icon}</div>
+      <div class="qcard-title">${c.title}</div>
+      <div class="qcard-desc">${c.desc}</div>
+    </div>`).join('');
+  document.getElementById('msgs').innerHTML = `
+    <div class="welcome" id="welcome">
+      <div class="welcome-icon">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+          <rect x="13" y="2" width="8" height="30" rx="2.5" fill="white"/>
+          <rect x="2" y="11" width="30" height="8" rx="2.5" fill="white" opacity=".82"/>
+        </svg>
+      </div>
+      <h2>Ascension Clinical AI</h2>
+      <p>Evidence-based clinical support powered by Google Vertex AI.<br>
+         Ask about drug interactions, guidelines, care protocols, and more.</p>
+      <div class="quick-grid">${cards}</div>
+    </div>`;
+}
+
+function quickSend(q) {
+  document.getElementById('inp').value = q;
+  send();
+}
+
+// ── Chat ───────────────────────────────────────────────────────────────
+function newChat() {
+  history = [];
+  renderWelcome();
+  document.getElementById('inp').value = '';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+
+function grow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 150) + 'px';
+}
+
+function clearInp() {
+  const el = document.getElementById('inp');
+  el.value = ''; el.style.height = 'auto'; el.focus();
+}
+
+async function send() {
+  const el = document.getElementById('inp');
+  const text = el.value.trim();
+  if (!text || busy) return;
+  if (!cfg.key) { openSettings(); return; }
+
+  // Remove welcome screen on first message
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+
+  history.push({ role: 'user', parts: [{ text }] });
+  addBubble('user', text);
+  el.value = ''; el.style.height = 'auto';
+
+  busy = true;
+  document.getElementById('sendBtn').disabled = true;
+  const typing = addTyping();
+
+  try {
+    const reply = await callAPI();
+    typing.remove();
+    history.push({ role: 'model', parts: [{ text: reply }] });
+    addBubble('assistant', reply);
+  } catch(err) {
+    typing.remove();
+    addError(err.message);
+  } finally {
+    busy = false;
+    document.getElementById('sendBtn').disabled = false;
+    el.focus();
+  }
+}
+
+// ── Vertex AI REST API ─────────────────────────────────────────────────
+// Endpoint: https://{region}-aiplatform.googleapis.com/v1/projects/{project}
+//           /locations/{region}/publishers/google/models/{model}:generateContent
+// Auth:     Bearer token from `gcloud auth print-access-token`
+async function callAPI() {
+  if (!cfg.project) throw new Error('GCP Project ID is not set. Open Configure to add it.');
+  if (!cfg.key)     throw new Error('Bearer token is missing. Run: gcloud auth print-access-token');
+
+  const url = `https://${cfg.region}-aiplatform.googleapis.com/v1/projects/${cfg.project}`
+            + `/locations/${cfg.region}/publishers/google/models/${cfg.model}:generateContent`;
+
+  const body = {
+    system_instruction: { parts: [{ text: cfg.sys }] },
+    contents: history,
+    generationConfig: {
+      temperature: 0.25,
+      maxOutputTokens: 2048,
+      topP: 0.9,
+    },
+    safetySettings: [
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_ONLY_HIGH' },
+    ]
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${cfg.key}`,
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (res.status === 401) {
+    throw new Error('Token expired or invalid (401). Run <code>gcloud auth print-access-token</code> for a fresh token and update Configure.');
+  }
+  if (res.status === 403) {
+    throw new Error('Permission denied (403). Ensure your account has the <strong>roles/aiplatform.user</strong> role on project <strong>' + cfg.project + '</strong>.');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `Vertex AI returned HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+
+  const reason = data?.promptFeedback?.blockReason;
+  if (reason) throw new Error(`Request blocked by safety filter: ${reason}`);
+
+  const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!txt) throw new Error('Empty response from model. Verify the model is enabled in Vertex AI Model Garden for project ' + cfg.project);
+  return txt;
+}
+
+// ── DOM helpers ────────────────────────────────────────────────────────
+function addBubble(role, text) {
+  const c = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  const initials = role === 'user' ? (cfg.initials || 'MD') : '✦';
+  const sender   = role === 'user' ? 'Clinician' : 'Ascension AI';
+  const time     = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  d.innerHTML = `
+    <div class="avatar">${initials}</div>
+    <div class="msg-body">
+      <div class="msg-sender">${sender}</div>
+      <div class="bubble">${role === 'assistant' ? md(text) : esc(text).replace(/\n/g,'<br>')}</div>
+      <div class="msg-time">${time}</div>
+    </div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+function addTyping() {
+  const c = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = 'msg assistant typing-wrap';
+  d.innerHTML = `
+    <div class="avatar">✦</div>
+    <div class="msg-body">
+      <div class="msg-sender">Ascension AI</div>
+      <div class="bubble"><div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+    </div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+  return d;
+}
+
+function addError(msg) {
+  const c = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = 'msg assistant';
+  d.innerHTML = `
+    <div class="avatar">✦</div>
+    <div class="msg-body">
+      <div class="msg-sender">System</div>
+      <div class="err-bubble">⚠️ <strong>Error:</strong> ${esc(msg)}<br>
+        <small>Check your API key in <a href="#" onclick="openSettings();return false;">Configure</a>, or verify your quota at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>.</small>
+      </div>
+    </div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+// ── Markdown renderer (safe subset) ───────────────────────────────────
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function md(raw) {
+  let s = esc(raw);
+  // headings
+  s = s.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+  s = s.replace(/^### (.+)$/gm,  '<h3>$1</h3>');
+  s = s.replace(/^## (.+)$/gm,   '<h3>$1</h3>');
+  // bold / italic / code
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/\*(.+?)\*/g,     '<em>$1</em>');
+  s = s.replace(/`(.+?)`/g,       '<code>$1</code>');
+  // horizontal rule
+  s = s.replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #E2E8F0;margin:10px 0">');
+  // unordered lists
+  s = s.replace(/((?:^[-*+] .+\n?)+)/gm, m => {
+    const items = m.trim().split('\n').map(l => `<li>${l.replace(/^[-*+] /,'')}</li>`).join('');
+    return `<ul>${items}</ul>`;
+  });
+  // ordered lists
+  s = s.replace(/((?:^\d+\. .+\n?)+)/gm, m => {
+    const items = m.trim().split('\n').map(l => `<li>${l.replace(/^\d+\. /,'')}</li>`).join('');
+    return `<ol>${items}</ol>`;
+  });
+  // paragraphs
+  s = s.split(/\n{2,}/).map(p => {
+    p = p.trim();
+    if (!p) return '';
+    if (/^<(h[2-4]|ul|ol|hr)/.test(p)) return p;
+    return `<p>${p.replace(/\n/g,'<br>')}</p>`;
+  }).join('\n');
+  return s;
+}
+</script>
+</body>
+</html>

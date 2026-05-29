@@ -4,7 +4,7 @@
 
 A structured research and testing effort to define, validate, and encode the Ascension brand voice into a Vertex AI Gemini clinical agent. Covers vocabulary, tone, data presentation rules, scope guardrails, and iterative prompt refinement across five evaluation runs.
 
-**[View the full research report →](https://wwtdigital.github.io/agent-brand-research/)**
+**[View the full research report →](https://wwtdigital.github.io/agent-brand-research/)** &nbsp;·&nbsp; **[View the presentation →](https://wwtdigital.github.io/agent-brand-research/presentation.html)**
 
 ---
 

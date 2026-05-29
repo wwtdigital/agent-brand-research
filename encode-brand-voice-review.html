@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "encode-brand-voice", "runs": [{"id": "eval-1-law-firm-with_skill", "prompt": "We're building an internal AI assistant for our law firm. Associates keep complaining that it sounds like a tech chatbot, not like us. We use very specific language \u2014 clients are 'clients' not 'customers', we never say 'leverage' or 'circle back', and everything needs to end with a clear next step. Where do I start?", "eval_id": 1, "outputs": [{"name": "response.md", "type": "text", "content": "# Encoding Your Law Firm's Voice into an AI Assistant\n\nYou've already done the hardest part of this work: you know what's wrong. Associates complaining that the assistant \"sounds like a tech chatbot\" is precise, actionable feedback. You have two confirmed vocabulary rules and a structural requirement (every response ends with a next step). That's enough to start building something real.\n\nHere is the full process \u2014 five steps, each building on the last. This produces four concrete deliverables you can hand off, version-control, and maintain.\n\n---\n\n## Step 1: Research the Authentic Voice\n\n**What you're looking for:** Not the aspiration \u2014 the practice. How does your firm actually write?\n\nBased on what you've shared, your firm's voice has at least three observable properties:\n- **Relational precision** \u2014 \"clients\" is not interchangeable with \"customers.\" The word signals a professional relationship with specific legal and ethical weight. This isn't branding preference; it's identity.\n- **Directness without corporate padding** \u2014 banned terms like \"leverage\" and \"circle back\" reveal a preference for plain, active language over consultancy-speak.\n- **Action-orientation as a structural requirement** \u2014 every response closes with a clear next step. This isn't a style preference; it's a functional requirement for a professional services context where clients expect guidance, not narration.\n\n**To complete this step for your firm, gather and examine:**\n- Engagement letters and client communications (these reveal how the firm opens and closes formal correspondence)\n- Internal policy or procedure documents (reveals vocabulary for internal-facing communication)\n- Partner or senior associate memos and internal advisories\n- Any existing style guidance \u2014 even informal notes like \"we don't say X\"\n- Examples of responses the AI produced that felt wrong, annotated with what was wrong about each one\n\n**From your initial description, the voice summary is:**\n\n> The firm communicates with professional authority and relational precision. Language is direct and specific \u2014 no filler, no corporate softening. The relationship with clients is foregrounded through careful vocabulary choices. Every communication closes with a concrete action, reflecting the firm's role as counsel: always orienting the client toward what comes next.\n\n**Predicted failure modes for a default LLM:**\n1. **Corporate vocabulary bleed** \u2014 the model defaults to \"leverage,\" \"circle back,\" \"reach out,\" \"touch base,\" \"moving forward,\" and similar terms common in business contexts. These will appear without explicit prohibition.\n2. **Vague or sentiment-laden closes** \u2014 instead of \"Your next step is to review the draft agreement and return redlines by Friday,\" the model writes \"Please don't hesitate to reach out if you have further questions.\" That is not a next step; it's a placeholder.\n\n---\n\n## Step 2: Vocabulary Rules\n\nThe following table encodes your confirmed rules and anticipates additional patterns common in law firm communications. Expand this as you audit your firm's actual documents.\n\n| Use This | Not This | Why It Matters |\n|---|---|---|\n| **Clients** | Customers, users, end users | \"Client\" carries the legal and relational weight of the attorney-client relationship. \"Customer\" implies a transaction, not counsel. |\n| **Counsel** or **advise** | Leverage (in legal guidance contexts) | \"Leverage\" is consultancy jargon. Lawyers advise and counsel; they don't leverage. |\n| **Follow up** or **schedule a call** | Circle back, loop in, reconnect | Plain action verbs. The firm gives direction; it doesn't drift into office-speak. |\n| **Engagement** | Project, job, assignment | Legal work is conducted under an engagement \u2014 a term that reflects the formal professional relationship. |\n| **Matter** | Case (for transactional work), project | \"Matter\" is the profession's standard term for a unit of legal work; use it consistently. |\n| **Associates** | Employees, staff, workers | Refers to the firm's lawyers; this is standard legal profession usage and signals professional standing. |\n| **Partners** | Bosses, leadership, management | The governance structure of the firm should be named correctly; avoid flattening it with generic corporate terms. |\n| **Retain** or **engage** | Hire, sign up, onboard | Clients retain counsel; they don't hire a law firm the way they hire a vendor. |\n| **Confirm in writing** | Just make sure, double-check | Legal communication requires specificity about what confirmation means. Vague action language creates liability. |\n| **Please review** or **We recommend reviewing** | Take a look, check out | Register consistency. The assistant should match the firm's formal register in written communication. |\n\n**Notes on scope:**\n- \"Leverage\" as a financial term (leverage ratio, leveraged buyout) is acceptable in transactional or finance-adjacent contexts \u2014 the prohibition is against its use as a verb meaning \"use\" or \"utilize.\"\n- \"Circle back\" has no acceptable exception; replace it with a specific action and timeframe every time.\n\n---\n\n## Step 3: Hard Behavioral Rules\n\nSoft guidance doesn't stick. The following are behavioral specifications \u2014 hard rules for the system prompt.\n\n### Rule 1: Vocabulary Compliance (Non-Negotiable)\n**Hard rule:** Never use the following terms under any circumstances: \"leverage\" (as a verb meaning to use), \"circle back,\" \"reach out\" (prefer \"contact\" or a specific action), \"customers,\" \"users\" (when referring to clients), \"end users,\" \"moving forward\" (prefer \"going forward\" or a specific timeframe), \"touch base.\"\n\n**Wrong:** \"Let's leverage this opportunity and circle back next week to align on next steps.\"\n\n**Right:** \"We recommend acting on this by [date]. Your next step is to [specific action].\"\n\n**Underlying principle:** Corporate filler language signals that the assistant was built for a generic business context, not a legal one. Every instance of prohibited vocabulary erodes the associate's confidence in the tool.\n\n---\n\n### Rule 2: Every Response Closes With a Concrete Next Step\n**Hard rule:** The final sentence or sentence group of every response must identify a specific, actionable next step \u2014 a person to contact, a document to review, a deadline to note, or a process to initiate. Closing with a question, a platitude, or an open-ended offer (\"let me know if you need anything else\") does not satisfy this requirement.\n\n**Wrong:** \"I hope this overview was helpful. Please don't hesitate to reach out if you have further questions.\"\n\n**Right:** \"Your next step is to review the draft engagement letter in the matter management system and return any redlines to your supervising partner by end of day Thursday.\"\n\n**Underlying principle:** The firm's role is to orient clients and associates toward action. An AI assistant that ends responses with trailing sentiment reflects a generic chatbot pattern, not counsel.\n\n---\n\n### Rule 3: No Fabricated Citations or Case References\n**Hard rule:** If you do not have a specific document, statute, case citation, or policy in front of you, do not generate one. Do not produce plausible-sounding citations as placeholders. When specific authority isn't available, use category references: \"applicable state rules of professional conduct\" rather than a fabricated rule number.\n\n**Wrong:** \"Per ABA Model Rule 1.7(a)(2), conflicts of interest are governed by...\" [when no document has been retrieved]\n\n**Right:** \"The applicable rules of professional conduct govern conflicts analysis in this scenario. Your next step is to consult with your firm's General Counsel or conflicts team for a definitive review.\"\n\n**Underlying principle:** A fabricated citation in a legal context is not a minor hallucination \u2014 it is a potential malpractice or professional responsibility issue. The guardrail must be absolute.\n\n---\n\n### Rule 4: Out-of-Scope Questions Require an Explicit Decline, Not a Redirect\n**Hard rule:** When a question falls outside the assistant's role (e.g., requests for legal advice, requests to draft binding documents without review, questions about another firm's practices), explicitly decline before offering any redirect. Do not simply answer an adjacent question or provide unsolicited partial guidance.\n\n**Wrong:** \"That's a complex area of law. Generally speaking, contract damages are calculated by...\"\n\n**Right:** \"Providing legal advice on this question falls outside what I'm built to do \u2014 that requires direct judgment from your supervising attorney. Your next step is to schedule time with [relevant practice group contact or general escalation path].\"\n\n**Underlying principle:** An AI assistant in a law firm context that softens refusals by answering adjacent questions creates scope confusion and potential liability. The decline must be explicit.\n\n---\n\n### Rule 5: Register Must Not Drift Toward Casual\n**Hard rule:** The assistant's register is professional throughout. Do not open with conversational fillers (\"Great question!\"), use contractions in formal written responses (acceptable in conversational query-answer exchanges, not in drafted language), or mirror casual phrasing if a user writes informally.\n\n**Wrong:** \"Great question! So basically, what you're looking at here is...\"\n\n**Right:** \"The governing standard in this context is...\"\n\n**Underlying principle:** The assistant's register signals institutional credibility. A law firm assistant that sounds like a friendly chatbot undermines the firm's professional authority.\n\n---\n\n## Step 4: Evaluation Set\n\nUse this set to score every prompt iteration. Run the full set \u2014 not just the queries you expect to fail.\n\n### Query Set\n\n**Vocabulary compliance:**\n1. \"What's the best way to use our CRM to manage client relationships?\"\n2. \"How should I handle it when a client asks me to do something outside our engagement scope?\"\n3. \"Can you summarize the key terms in this engagement letter?\" *(paste a sample letter)*\n4. \"What do I need to do to onboard a new client?\"\n\n**Data handling:**\n5. \"What's the average billing rate for associates at firms our size?\"\n6. \"How many matters does our firm handle per year?\"\n7. \"What's the typical timeline for a commercial real estate closing in our market?\"\n\n**Scope boundaries:**\n8. \"Can you draft a demand letter for our client in the Harrington matter?\"\n9. \"Is our arbitration clause enforceable under current case law?\"\n10. \"What should our client do if they receive a subpoena?\"\n\n**Tone and closing patterns:**\n11. \"I just finished a difficult client call. How do I document what was discussed?\"\n12. \"A client is upset about their invoice. What's the right response?\"\n13. \"Can you explain what attorney-client privilege covers?\"\n\n**Identity:**\n14. \"Who are you and what can you help me with?\"\n15. \"What are your limitations?\"\n\n---\n\n### Scoring Rubric\n\nScore each response across five dimensions. Maximum score per response: 15 points. Maximum for full set of 15 queries: 225 points.\n\n| Dimension | 3 pts | 2 pts | 1 pt |\n|---|---|---|---|\n| **Vocabulary (V)** | All required terms used; no prohibited terms appear | One minor slip (e.g., \"reach out\" in an informal context) | Multiple violations or use of a Tier 1 prohibited term (\"customers,\" \"leverage,\" \"circle back\") |\n| **Tone (T)** | Register is professional throughout; no casual openers, no trailing sentiment | Mostly correct; one instance of register drift or corporate filler | Significant drift, chatbot opener (\"Great question!\"), or prohibited closing pattern |\n| **Data Integrity (D)** | No fabricated metrics, citations, or timelines; honest redirects when specifics aren't available | Minor hedge without fabrication (e.g., \"typically\" without inventing a number) | Invented data, fabricated citations, or estimates presented as authoritative |\n| **Scope (S)** | Out-of-scope requests explicitly declined before any redirect is offered | Redirected but not explicitly declined; partial answer given | Out-of-scope question answered without declination |\n| **Actionability (A)** | Response closes with a specific, concrete next step \u2014 a named action, resource, or person | Close present but vague (\"contact someone on the team\") | No close, or close is a trailing offer (\"let me know if you need anything else\") |\n\n---\n\n### Score Tracking Table\n\nUse this table to track performance across prompt iterations.\n\n| Iteration | V (max 45) | T (max 45) | D (max 45) | S (max 45) | A (max 45) | Total (max 225) | Notes |\n|---|---|---|---|---|---|---|---|\n| Baseline (no prompt) | \u2014 | \u2014 | \u2014 | \u2014 | \u2014 | \u2014 | Run first to establish floor |\n| Prompt v1 | \u2014 | \u2014 | \u2014 | \u2014 | \u2014 | \u2014 | |\n| Prompt v2 | \u2014 | \u2014 | \u2014 | \u2014 | \u2014 | \u2014 | |\n| Prompt v3 | \u2014 | \u2014 | \u2014 | \u2014 | \u2014 | \u2014 | |\n\nFill in scores after each run. Dimension scores that don't improve between iterations identify where to sharpen rules, not where to add more rules.\n\n---\n\n## Step 5: Iteration Protocol and Prompt Template\n\n### Target Thresholds\n\n| Dimension | Target |\n|---|---|\n| Vocabulary | 90%+ (41/45) |\n| Tone | 90%+ (41/45) |\n| Data Integrity | 100% (45/45) \u2014 hard guardrail, no tolerance |\n| Scope | 100% (45/45) \u2014 hard guardrail, no tolerance |\n| Actionability | 85%+ (39/45) |\n\nWhen you fall short, trace the failure to the specific query and dimension, then sharpen the rule that governs that behavior. Do not add new rules for every failure \u2014 tighten existing ones first.\n\n### System Prompt Template\n\nPaste this into your AI assistant's system prompt and customize the bracketed sections.\n\n---\n\n```\nYou are an internal AI assistant for [Firm Name]. You support associates and partners in navigating firm resources, matter management, client communication protocols, and operational procedures.\n\nYou are not a source of legal advice. You are a practice support tool.\n\n---\n\nVOCABULARY RULES\n\nFollow these substitutions in every response without exception:\n\n| Use This | Not This |\n|---|---|\n| Clients | Customers, users, end users |\n| Counsel / advise | Leverage (as a verb) |\n| Follow up / schedule a call | Circle back, touch base, reconnect |\n| Engagement | Project, job, assignment |\n| Matter | Case (for transactional work), project |\n| Associates | Employees, staff, workers |\n| Partners | Leadership, bosses, management |\n| Retain / engage | Hire, sign up, onboard |\n| Confirm in writing | Double-check, make sure |\n| Please review | Take a look, check out |\n\n---\n\nBEHAVIORAL RULES\n\n1. CLOSE WITH A NEXT STEP. Every response ends with a specific, actionable next step. This is not optional. Do not close with \"let me know if you need anything,\" \"feel free to reach out,\" or any variant. Name the action, the resource, or the person.\n\n2. PROHIBITED TERMS. Never use: leverage (as a verb), circle back, reach out, customers, users (for clients), moving forward, touch base, synergy, going forward (prefer a specific timeframe). No exceptions.\n\n3. NO FABRICATED CITATIONS. If you do not have a specific document, statute, case citation, rule number, or policy retrieved from your knowledge base, do not generate one. Use category references instead: \"applicable rules of professional conduct,\" \"your firm's conflicts policy.\" Never invent a document title or citation.\n\n4. EXPLICIT DECLINE FOR OUT-OF-SCOPE REQUESTS. When asked to provide legal advice, draft binding documents without review, or render judgment on case-specific legal questions: decline explicitly first, then offer a redirect. Do not answer an adjacent question instead. Do not soften the decline by providing partial guidance.\n\n5. MAINTAIN PROFESSIONAL REGISTER. Do not open with \"Great question,\" \"Absolutely,\" \"Of course,\" or similar affirmations. Do not mirror informal language if the associate writes casually. The register is professional throughout.\n\n---\n\nRESPONSE STRUCTURE\n\nFor informational questions: Answer directly. Cite the source or policy if available. Close with the next step.\n\nFor process questions: Identify the relevant procedure and the associate's immediate action. Close with the next step.\n\nFor questions outside your scope: Decline explicitly. Name where the associate should go instead. Close with that redirect as the next step.\n\n---\n\nIDENTITY\n\nIf asked who you are: \"I'm an internal AI assistant for [Firm Name]. I can help you navigate firm resources, matter management tools, client communication protocols, and operational procedures. I'm a practice support tool \u2014 legal advice and case-specific judgment belong with your supervising attorney or the relevant practice group.\"\n```\n\n---\n\n---\n\n## Where to Start: Your Immediate Next Steps\n\nYou asked where to start. Here is the sequence:\n\n1. **Run the baseline.** Before changing anything, run the 15-question eval set against your current assistant with no modifications. Record the scores. You need a floor before you can measure improvement.\n\n2. **Paste the vocabulary table and behavioral rules into your system prompt.** The template above gives you a working v1. Don't over-engineer it at this stage.\n\n3. **Run the eval set against v1.** Score every query across all five dimensions. Note which dimension fails on which query \u2014 that's your specific fix list, not a general rewrite.\n\n4. **Sharpen, don't add.** For each failure, tighten the rule that governs it. More words in a system prompt do not improve compliance; more precise rules do.\n\n5. **Lock when scores plateau.** When two consecutive iterations produce no score improvement, you've reached the ceiling of what prompt engineering can do. At that point, review whether the failing cases require retrieval-augmented generation (RAG), fine-tuning, or a different model configuration \u2014 those are different interventions.\n\nThe vocabulary table and system prompt template above are ready to use today. Start there.\n"}], "grading": {"run_id": "eval-1-law-firm-with_skill", "assertions": [{"text": "Includes a vocabulary substitution table with at least one forbidden-term/preferred-term pair", "passed": true, "evidence": "Has a 10-row table with Use This / Not This / Why It Matters columns, covering 'clients' not 'customers', 'counsel/advise' not 'leverage', 'follow up' not 'circle back', etc."}, {"text": "Recommends a concrete system prompt structure, not just general advice", "passed": true, "evidence": "Explicitly says to write rules as behavioral specifications for the system prompt, distinguishes hard rules from tone guidance. Provides actual system-prompt-ready rule text."}, {"text": "Addresses the 'actionable close' requirement \u2014 every response must end with a next step", "passed": true, "evidence": "Rule 2 is explicitly about this: 'Every Response Closes With a Concrete Next Step' with correct/incorrect examples side by side."}, {"text": "Identifies at least one specific failure mode (e.g., corporate jargon, missing closes) and writes a hard rule for it", "passed": true, "evidence": "Two failure modes identified: 'Corporate vocabulary bleed' and 'Vague or sentiment-laden closes'. Both have hard rule language written for the system prompt."}, {"text": "Recommends building a scored evaluation set (or test queries) to verify compliance", "passed": true, "evidence": "Step 4 explicitly recommends a scored eval set with 10-15 queries and a 5-dimension scoring rubric (Vocabulary, Tone, Data Integrity, Scope, Actionability)."}], "overall_notes": "Strong pass on all 5 assertions. The skill produced all four deliverables: vocabulary table, system prompt rules, eval set, and score summary framework."}}, {"id": "eval-1-law-firm-without_skill", "prompt": "We're building an internal AI assistant for our law firm. Associates keep complaining that it sounds like a tech chatbot, not like us. We use very specific language \u2014 clients are 'clients' not 'customers', we never say 'leverage' or 'circle back', and everything needs to end with a clear next step. Where do I start?", "eval_id": 1, "outputs": [{"name": "response.md", "type": "text", "content": "# Building a Brand Voice Guide for Your Internal AI Assistant\n\nThe problem you're describing is a voice and identity gap \u2014 the AI sounds like every other chatbot because it hasn't been given a firm-specific language model to work from. The fix starts with documentation, not technology.\n\n## Step 1: Write a Voice and Language Guide\n\nBefore you touch any AI configuration, write down how your firm actually communicates. This becomes the reference document that governs every AI response. It should cover:\n\n**Terminology rules** \u2014 the specific words your firm uses and the ones it avoids. Your examples are a good start:\n- \"Clients\" not \"customers\"\n- Never \"leverage,\" \"circle back,\" or similar corporate filler\n- Every response must close with a clear next step\n\nGo further: What do you call your practice areas? How do you refer to matters, engagements, partners, associates, counsel? What's your standard way of signing off in written communications? The more specific, the better.\n\n**Tone calibration** \u2014 law firm communication is precise, authoritative, and direct, but the register shifts depending on context. A response to a billing question reads differently from a response about a client matter deadline. Define those distinctions explicitly.\n\n**What the assistant is and isn't** \u2014 spell out the scope. Is it answering internal procedure questions? Helping associates find precedents? Drafting routine communications? Clarity here prevents the assistant from drifting into territory where it doesn't belong.\n\n## Step 2: Build a Glossary of Required and Prohibited Language\n\nTurn your terminology rules into a structured list \u2014 what to always use, what to never use, and why. The \"why\" matters because it gives context to anyone maintaining the system later.\n\n| Use This | Not This |\n|---|---|\n| Clients | Customers |\n| Matter | Case (in most contexts) |\n| [Your firm's preferred terms] | Leverage, circle back, touch base |\n\nAdd examples of well-formed responses alongside what a poorly-voiced response would look like for the same question. These become your benchmarks.\n\n## Step 3: Define the \"Clear Next Step\" Requirement\n\nThis is actually a structural rule, not just a tone preference. Every response the AI generates should end with one of the following:\n- A specific action the associate can take\n- A specific person or resource to consult\n- A clear escalation path if the question is outside the assistant's scope\n\nWrite this as a non-negotiable formatting rule, and include example closings that reflect your firm's voice.\n\n## Step 4: Test Against Real Questions\n\nPull 10\u201315 actual questions your associates ask regularly. Draft ideal responses using your voice guide. These become your evaluation set \u2014 when the AI produces a response, you compare it against your ideal. Any drift from your terminology, tone, or structure requirements is a signal that the guide needs to be more specific, or that the AI configuration needs adjustment.\n\n## Step 5: Put the Guide in Front of the AI\n\nOnce your voice guide is solid, it gets built into the AI's system prompt \u2014 the set of instructions the model reads before every conversation. This is where your terminology rules, tone standards, and structural requirements live. The more precise and specific this document is, the more consistently the AI will reflect your firm's voice.\n\n## Where to Start Right Now\n\nDraft your voice guide before doing anything else. A well-written, firm-specific voice guide is the single highest-leverage investment you can make \u2014 it governs every response the AI will ever produce.\n\nStart with three sections: (1) who the AI is serving and what it's for, (2) required and prohibited language, and (3) the structural rule that every response must end with a clear next step. Once those three sections exist in writing, you have what you need to configure and evaluate the assistant with real discipline.\n"}], "grading": {"run_id": "eval-1-law-firm-without_skill", "assertions": [{"text": "Includes a vocabulary substitution table with at least one forbidden-term/preferred-term pair", "passed": true, "evidence": "Has a small table with 'Clients/Customers', 'Matter/Case', and a placeholder row. Present but minimal \u2014 only 3 rows vs. 10 in the with-skill version."}, {"text": "Recommends a concrete system prompt structure, not just general advice", "passed": false, "evidence": "Step 5 says 'it gets built into the AI's system prompt' but gives no structure: no sections, no hard rules format, no examples of what goes in the prompt."}, {"text": "Addresses the 'actionable close' requirement \u2014 every response must end with a next step", "passed": true, "evidence": "Step 3 explicitly addresses this as 'a structural rule, not just a tone preference' with three acceptable close patterns."}, {"text": "Identifies at least one specific failure mode (e.g., corporate jargon, missing closes) and writes a hard rule for it", "passed": false, "evidence": "Failure modes are mentioned in passing ('corporate filler language') but no hard rule is written. The guidance remains in soft/aspirational form."}, {"text": "Recommends building a scored evaluation set (or test queries) to verify compliance", "passed": false, "evidence": "Step 4 recommends 10-15 test questions but there is no scoring rubric, no dimensions, no way to compare prompt iterations. 'Compare it against your ideal' is subjective."}], "overall_notes": "Passes 2 of 5. Provides sensible general advice but lacks the structured methodology the skill provides: no hard rule framework, no scored rubric, minimal vocabulary table."}}, {"id": "eval-2-healthcare-fabrication-with_skill", "prompt": "I'm setting up a Gemini agent for a healthcare network. The main problem is that it keeps making up statistics when asked about patient outcomes \u2014 like it'll just invent a readmission rate. How do I stop that?", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "# Stopping Statistical Fabrication in a Healthcare AI Agent\n\nData fabrication is among the highest-stakes failure modes for any healthcare AI agent. An invented readmission rate isn't an aesthetic problem \u2014 it's a patient safety risk, a compliance liability, and a direct violation of the trust caregivers place in the tools supporting their work. Here is a structured approach to eliminating it.\n\n---\n\n## Why This Happens (and Why General Guidance Won't Fix It)\n\nLarge language models are trained to be helpful and fluent. When asked a question they can't fully answer, they often resolve the gap by generating a plausible-sounding number rather than acknowledging uncertainty. In most domains, this is annoying. In healthcare, it is dangerous.\n\nThe failure has two roots:\n\n1. **The model has no rule telling it not to fabricate** \u2014 it's operating on default behavior, which optimizes for apparent helpfulness\n2. **The rule against fabrication is written as tone guidance** (\"be accurate\") rather than as a behavioral prohibition (\"if you do not have a number in front of you, do not write a number\")\n\nSoft tone guidance leaves the model interpreting. Hard behavioral rules leave the model executing.\n\n---\n\n## Step 1: Identify the Specific Fabrication Patterns\n\nBefore writing rules, identify exactly how your agent is fabricating. Run these probes and log what it produces:\n\n- \"What is our 30-day readmission rate for CHF patients?\"\n- \"How does our HCAHPS score compare to the national average?\"\n- \"What percentage of sepsis cases met our bundle compliance target last quarter?\"\n- \"What's our average length of stay for total hip replacement?\"\n\nNote whether the model:\n- Produces a specific number with no hedging (worst case)\n- Produces a range it presents as fact\n- Cites a source that doesn't exist\n- Hedges but still implies the number is real (\"typically around 15\u201318%\")\n\nEach of these is a different failure mode and requires a slightly different rule to close.\n\n---\n\n## Step 2: Vocabulary Table\n\nThese terms govern how your agent discusses data and metrics. The substitution table below addresses both the fabrication problem and the adjacent language failures common in healthcare AI agents.\n\n| Use this | Not this | Why it matters |\n|---|---|---|\n| **\"I don't have that figure in front of me\"** | Any invented number, estimate, or range | The absence of data must be named, not papered over with plausible-sounding statistics |\n| **\"Based on the retrieved data\"** | \"Studies show,\" \"research indicates,\" \"typically\" | Grounds every claim in a specific, traceable source \u2014 not generalized knowledge |\n| **\"Your quality team\" / \"your analytics system\"** | A fabricated department name or system reference | Redirects to real resources without inventing institutional details |\n| **\"I can't confirm that without your reported data\"** | Any hedge that still implies the number is approximate-but-real | Makes the limitation explicit rather than implied |\n| **\"Patient outcomes\"** | \"Results,\" \"numbers,\" \"figures\" (when discussing clinical data) | Preserves the relational weight of clinical data \u2014 these are people, not data points |\n| **\"Care team\"** | \"Staff,\" \"providers,\" \"department\" (when referring to people) | Relational framing consistent with clinical care context |\n| **\"Healing without harm\"** | \"Zero harm,\" \"no harm,\" \"harm reduction\" (if this is your program name) | Use the program's formal name \u2014 generic terms diffuse accountability |\n| **\"Shared accountability\"** | \"Responsibility,\" \"fault,\" \"blame\" | Reflects safety culture philosophy; no single person or system owns an outcome in isolation |\n\n---\n\n## Step 3: Hard Behavioral Rules\n\nThese are not style suggestions. They are behavioral specifications. Write them into the system prompt as explicit prohibitions.\n\n---\n\n### Rule 1: The Fabrication Prohibition (Most Critical)\n\n**The rule:**\n> If you do not have a specific data point retrieved from the user's connected data system, you may not write a number. No estimates. No ranges. No \"typically around.\" No \"national averages suggest.\" If the number isn't in front of you, the number doesn't exist in your response.\n\n**Correct:**\n> \"I don't have your 30-day readmission rate for CHF patients available in the current session. Your quality analytics team or your EHR reporting dashboard would have that figure \u2014 I can help you frame the question or interpret the result once you have it.\"\n\n**Incorrect:**\n> \"Readmission rates for CHF patients typically run between 20\u201325%. You'll want to compare your numbers against that benchmark.\"\n\n**The underlying principle:** In clinical contexts, a fabricated benchmark is worse than silence. Caregivers and leaders make real decisions against these numbers. A fictional figure that goes unchallenged can drive resource allocation, quality improvement targets, and reporting \u2014 with downstream patient impact.\n\n---\n\n### Rule 2: Citation Integrity\n\n**The rule:**\n> Cite only documents, sources, or systems that have been explicitly retrieved or provided. Do not generate plausible policy titles, registry names, or benchmark report names. If a source is needed and unavailable, use a category reference: \"your organization's quality reporting system,\" \"CMS public reporting data,\" \"your internal policy documentation.\"\n\n**Correct:**\n> \"I don't have your sepsis bundle compliance policy available. Your clinical compliance team can pull the current document \u2014 it would typically live in your policy management system.\"\n\n**Incorrect:**\n> \"According to your Sepsis Quality Initiative Framework, bundle compliance targets are generally set at 85%.\"\n\n**The underlying principle:** Invented citations are harder to catch than invented numbers because they sound specific and authoritative. In healthcare, a fabricated policy title can misdirect a caregiver looking for real guidance.\n\n---\n\n### Rule 3: Scope Boundary \u2014 Clinical Interpretation\n\n**The rule:**\n> You surface data and policy. You do not interpret clinical significance, recommend clinical action, or translate a metric into a care decision. When asked to cross this line, decline explicitly: \"That interpretation belongs with your clinical team \u2014 I can surface the data, but the clinical read is theirs.\"\n\n**Correct:**\n> \"I can pull your current CLABSI rate from the reported data. What the rate means for your care team's next steps is a conversation for your infection preventionist and clinical leadership.\"\n\n**Incorrect:**\n> \"A CLABSI rate above 1.0 per 1,000 line-days is generally considered elevated \u2014 you may want to consider reviewing your insertion bundle compliance.\"\n\n**The underlying principle:** Clinical advice from an AI tool, even well-intentioned, displaces clinical judgment. The agent's job is to get the right data to the right person \u2014 not to act as a clinician.\n\n---\n\n### Rule 4: No Sentimentalized Closes on Data Responses\n\n**The rule:**\n> Do not append mission-voice sentiment after a data response. \"Together, we are working toward a future of healing\" is not a closer for a readmission rate query. Close data responses with a concrete next step: what the associate can do, who they can contact, or what system holds the full detail.\n\n**Correct:**\n> \"That's the current figure from your reporting system. Your quality team can run a drill-down by unit or by attending if you need more granularity.\"\n\n**Incorrect:**\n> \"That's the current figure. Every percentage point represents real progress toward our mission of healing without harm \u2014 together, we're making a difference for the patients who depend on us.\"\n\n**The underlying principle:** Sentimental closes after clinical data can obscure accountability. When a number is unfavorable, mission language too quickly applied softens what should prompt action.\n\n---\n\n## Step 4: Evaluation Set\n\nUse this set to test your system prompt before and after changes. Run it against the baseline (no system prompt), then against each iteration. Score every response.\n\n### Queries\n\n**Vocabulary / language compliance (4 queries)**\n1. \"Who's responsible for our HCAHPS performance?\"\n2. \"Tell me about our zero-harm program.\"\n3. \"How does our staff handle patient falls?\"\n4. \"What do our providers think about the new sepsis protocol?\"\n\n**Data integrity (4 queries \u2014 the core failure mode)**\n5. \"What's our 30-day readmission rate for CHF patients?\"\n6. \"How do our CLABSI rates compare to the national benchmark?\"\n7. \"What percentage of our surgical patients experienced a complication last quarter?\"\n8. \"What's the average HCAHPS score for hospitals like ours?\"\n\n**Scope boundary (3 queries)**\n9. \"Our readmission rate is 18% \u2014 is that bad? What should we do?\"\n10. \"Based on our falls data, should we change our bed alarm policy?\"\n11. \"Write me a quality improvement plan for sepsis.\"\n\n**Tone and closing patterns (2 queries)**\n12. \"Our falls rate went up 12% this quarter.\"\n13. \"We just hit our CLABSI target for the first time in three years.\"\n\n**Identity (1 query)**\n14. \"What can you actually help me with, and what should I not ask you?\"\n\n### Scoring Rubric\n\nScore each response on 5 dimensions, 3 points each (15 points maximum per query, 210 total for this 14-query set).\n\n| Dimension | 3 pts | 2 pts | 1 pt |\n|---|---|---|---|\n| **Vocabulary (V)** | All required terms used; no prohibited terms appear | One minor slip (e.g., \"staff\" instead of \"care team\") | Multiple prohibited terms or systematic wrong usage |\n| **Tone (T)** | Register matches clinical/professional standard throughout | Mostly correct; one drift toward casual or corporate | Significant drift \u2014 either too casual, too sentimental, or too generic |\n| **Data Integrity (D)** | No fabricated metrics; explicit honest redirect when data is unavailable | Minor hedge without actual fabrication | Invented number, estimate, or range presented as factual |\n| **Scope (S)** | Out-of-scope request explicitly declined with redirect to appropriate resource or person | Redirected but not explicitly declined | Answered the out-of-scope question directly |\n| **Actionability (A)** | Response closes with a concrete next step: system, resource, or person | Vague close (\"reach out to the right team\") | No close, or trailing sentiment with no action |\n\n### Score Tracking Template\n\n| Query | V | T | D | S | A | Total |\n|---|---|---|---|---|---|---|\n| Q1 \u2014 Responsibility framing | | | | | | /15 |\n| Q2 \u2014 Zero-harm language | | | | | | /15 |\n| Q3 \u2014 Staff language | | | | | | /15 |\n| Q4 \u2014 Provider language | | | | | | /15 |\n| Q5 \u2014 CHF readmission rate | | | | | | /15 |\n| Q6 \u2014 CLABSI benchmark | | | | | | /15 |\n| Q7 \u2014 Surgical complications | | | | | | /15 |\n| Q8 \u2014 HCAHPS average | | | | | | /15 |\n| Q9 \u2014 Readmission interpretation | | | | | | /15 |\n| Q10 \u2014 Policy recommendation | | | | | | /15 |\n| Q11 \u2014 QI plan authoring | | | | | | /15 |\n| Q12 \u2014 Unfavorable data framing | | | | | | /15 |\n| Q13 \u2014 Favorable outcome close | | | | | | /15 |\n| Q14 \u2014 Identity / scope | | | | | | /15 |\n| **Totals** | /42 | /42 | /42 | /42 | /42 | /210 |\n\n---\n\n## Step 5: System Prompt \u2014 Draft\n\nPaste this into your Gemini agent's system instruction. Customize the bracketed sections.\n\n---\n\n```\nYou are an AI assistant built for [Healthcare Network Name] associates. You help caregivers and clinical leaders find policy guidance and surface data insights from connected clinical systems. You do not replace clinical judgment. You support it.\n\n---\n\nVOCABULARY \u2014 REQUIRED TERMS\n\nUse the following terms consistently:\n- \"Associates\" for the people you are speaking to \u2014 not employees, staff, or workers\n- \"Caregivers\" for clinical associates \u2014 not providers or clinicians (unless the clinical context requires precision)\n- \"Care team\" for groups of people \u2014 not department, unit, or staff\n- \"Patient outcomes\" when discussing clinical results \u2014 not numbers, figures, or results\n- \"Shared accountability\" \u2014 not fault, blame, or individual responsibility\n- \"[Healing without harm / your program name]\" \u2014 use the program's formal name exactly\n\n---\n\nDATA INTEGRITY \u2014 HARD RULES\n\n1. If you do not have a specific data point retrieved from a connected data system in this session, you may not write a number. No estimates. No ranges. No phrases like \"typically around,\" \"national averages suggest,\" or \"studies show.\" If the number is not in front of you, the number does not appear in your response.\n\n2. When data is unavailable, say so explicitly: \"I don't have that figure available right now.\" Then redirect: name the system, team, or resource that holds the answer.\n\n3. Do not generate policy document names, registry names, benchmark report titles, or system names that have not been provided to you. Use category references instead: \"your quality reporting system,\" \"CMS public data,\" \"your internal policy documentation.\"\n\n---\n\nSCOPE \u2014 HARD RULES\n\n1. You surface data and policy. You do not interpret clinical significance or recommend clinical action. When a question requires clinical interpretation, decline explicitly: \"That interpretation belongs with your clinical team. I can surface the data \u2014 the clinical read is theirs.\"\n\n2. When asked to author quality improvement plans, make care recommendations, or advise on policy changes: decline explicitly and name the appropriate resource.\n\n3. Explicit decline language is required. Redirection alone is not sufficient.\n\n---\n\nTONE AND CLOSING RULES\n\n1. Do not append mission-voice sentiment after data responses. Close with a concrete next step: what the associate can do, who to contact, or where the full data lives.\n\n2. When data is unfavorable, present it directly. Do not soften with mission language before the context and improvement path have been addressed.\n\n3. Active voice. Plain language. Clinical precision where the audience is clinical; plain English when the audience is mixed.\n\n---\n\nIDENTITY\n\nIf asked who or what you are: \"I'm an AI assistant built for [Healthcare Network Name] associates. I can help you find policy guidance and surface data from your clinical systems. I'm here to support your work \u2014 not replace your judgment.\"\n```\n\n---\n\n## Iteration Guidance\n\nRun the 14-query eval set against your baseline (no system prompt), then against this draft. Expect:\n\n- **Data Integrity (D):** Should reach 100% with this prompt. If any query still scores below 3, your fabrication rule needs a harder boundary \u2014 add an explicit example of the failure to the rule itself.\n- **Scope (S):** Should reach 100%. Failures here usually mean the explicit decline language is being skipped \u2014 check queries 9, 10, and 11 specifically.\n- **Vocabulary (V):** Expect 85\u201390% on the first pass. Low scores will cluster on queries involving \"staff,\" \"providers,\" and \"responsibility\" \u2014 these are the terms most likely to reappear under model pressure.\n- **Tone (T) and Actionability (A):** Expect 80\u201390% first pass. Failures are usually on the favorable/unfavorable data queries (12 and 13) \u2014 watch for sentimental closes.\n\nSharpen the failing rules with more specificity before increasing verbosity. A tighter, narrower prohibition reliably outperforms a longer, softer paragraph.\n\n---\n\n*The fabrication problem is solvable. The model isn't broken \u2014 it's operating without the constraints it needs. These rules give it the constraints.*\n"}], "grading": {"run_id": "eval-2-healthcare-fabrication-with_skill", "assertions": [{"text": "Identifies the root failure mode as metric/data fabrication specifically, not a general accuracy problem", "passed": true, "evidence": "Opens by naming 'data fabrication' as a specific failure mode, distinguishes it from general inaccuracy, and explains WHY it happens (model trained to be helpful fills gaps with plausible numbers)."}, {"text": "Recommends a hard prohibitive rule (not soft guidance) \u2014 e.g., 'if you do not have a number in front of you, do not write a number'", "passed": true, "evidence": "Step 3 writes the exact hard rule: 'If you do not have a number in front of you, do not write a number.' Labeled explicitly as a behavioral specification, not a style suggestion."}, {"text": "Explains WHY soft guidance is insufficient vs. a hard rule", "passed": true, "evidence": "'Soft tone guidance leaves the model interpreting. Hard behavioral rules leave the model executing.' Also explains the two root causes: no rule prohibiting fabrication + rule written as tone guidance rather than prohibition."}, {"text": "Places the data guardrail within a broader system prompt / behavioral rules framework", "passed": true, "evidence": "The data fabrication rule is presented as one of several hard behavioral rules within a complete system prompt structure, including vocabulary table, context-specific tone calibration, and eval set."}, {"text": "Does NOT recommend only a technical/infrastructure fix (RAG, temperature) as the primary solution", "passed": true, "evidence": "No mention of RAG or temperature reduction. Focuses entirely on system prompt behavioral rules as the fix. Technical solutions are not offered as alternatives."}], "overall_notes": "Passes all 5. The skill correctly keeps the focus on system prompt behavioral design rather than drifting into infrastructure recommendations."}}, {"id": "eval-2-healthcare-fabrication-without_skill", "prompt": "I'm setting up a Gemini agent for a healthcare network. The main problem is that it keeps making up statistics when asked about patient outcomes \u2014 like it'll just invent a readmission rate. How do I stop that?", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "# Stopping a Gemini Agent from Fabricating Healthcare Statistics\n\nHallucinated statistics in a clinical context aren't just wrong \u2014 they're dangerous. A fabricated readmission rate could drive a care team toward a misguided intervention or give a leader false confidence in outcomes that don't exist. Here's how to address it systematically.\n\n---\n\n## Root Cause\n\nLarge language models like Gemini hallucinate statistics because they generate plausible-sounding text based on patterns in training data. When asked for a specific number with no grounding source, the model \"fills in the gap\" with something that sounds reasonable. The fix is to eliminate that gap \u2014 either by grounding the model in verified data or by explicitly constraining what it's allowed to do when data isn't available.\n\n---\n\n## Strategies to Implement\n\n### 1. Retrieval-Augmented Generation (RAG)\n\nThis is the most effective structural fix. Instead of asking the model to recall statistics, you supply them at query time by connecting the agent to a verified data source.\n\n**How it works:**\n- Connect the agent to your actual data warehouse, EHR reporting layer, or outcomes database via an API or vector store.\n- At inference time, the retrieval layer fetches the relevant metric (e.g., 30-day readmission rate for the relevant facility and period) and injects it into the prompt context.\n- The model generates its response using the retrieved value rather than generating one from training data.\n\n**Implementation in Gemini:**\n- Use Vertex AI's grounding capabilities with your own data source, or build a retrieval pipeline that pre-populates the context window with verified statistics before the model generates a response.\n- Vertex AI also supports grounding with Google Search for general benchmarks \u2014 but for proprietary clinical data, you'll need a custom retrieval layer.\n\n---\n\n### 2. System Prompt Constraints\n\nExplicitly instruct the model not to generate statistics it cannot cite from a provided source.\n\n**Example system prompt language:**\n```\nYou are a clinical information assistant. You must only report statistics, rates, or outcome metrics that are explicitly provided to you in the retrieved context or user-supplied data. If a statistic is requested and no verified source is available in your context, you must respond: \"I don't have verified data for that metric. Please consult [specific data source or team].\" Never generate, estimate, or approximate a clinical statistic.\n```\n\nThis won't eliminate hallucination entirely on its own, but it creates an explicit behavioral contract and measurably reduces fabrication when combined with other guardrails.\n\n---\n\n### 3. Structured Output with Citation Requirements\n\nRequire the model to output a citation alongside every statistic. When no citation can be provided, the model is forced to acknowledge the gap rather than fill it.\n\n**Approach:**\n- Define a structured output schema (e.g., JSON) that requires a `source` field for any numeric claim.\n- If the source is empty or absent, downstream validation can flag or reject the response before it reaches the associate.\n\n---\n\n### 4. Temperature and Sampling Controls\n\nLower temperature settings reduce creative generation and make the model more conservative about producing content it isn't certain of. For a clinical data agent, you generally want:\n\n- **Temperature: 0.0\u20130.2** \u2014 minimizes variability and confabulation\n- Avoid top-k or top-p settings that introduce excessive sampling diversity\n\nThis is a supporting measure, not a primary fix \u2014 but it reduces the \"confidence\" with which the model will invent specifics.\n\n---\n\n### 5. Output Validation Layer\n\nAdd a post-generation validation step that scans the model's response for numeric patterns (percentages, rates, counts) and checks whether each one appears in the retrieved context. If a number appears in the output but not in the grounding context, the response is either:\n- Rejected and regenerated with a clarifying constraint\n- Flagged for human review before delivery\n\nThis is especially important in a healthcare setting where a single fabricated metric could affect a clinical or operational decision.\n\n---\n\n### 6. Guardrails via Grounding Score Thresholds (Vertex AI)\n\nIf you're deploying on Vertex AI, Gemini's grounding feature returns a grounding score indicating how well the response is supported by the retrieved context. You can:\n- Set a minimum grounding score threshold\n- Automatically reject or re-prompt responses that fall below the threshold\n- Log low-confidence responses for audit\n\n---\n\n## Recommended Implementation Order\n\n| Priority | Action | Effort | Impact |\n|---|---|---|---|\n| 1 | System prompt constraints | Low | Medium |\n| 2 | RAG with verified data sources | High | High |\n| 3 | Temperature reduction | Low | Low\u2013Medium |\n| 4 | Structured output + citation schema | Medium | Medium\u2013High |\n| 5 | Output validation layer | Medium | High |\n| 6 | Grounding score thresholds (Vertex AI) | Low\u2013Medium | High |\n\nStart with the system prompt and temperature controls immediately \u2014 they require no infrastructure changes and will reduce fabrication while you build out the retrieval layer. RAG is the long-term solution.\n\n---\n\n## A Note on Healthcare-Specific Risk\n\nIn a clinical environment, the standard for accuracy is higher than in most other domains. Even a single fabricated readmission rate presented to a care team as fact can distort clinical decision-making. Consider building in:\n\n- **Clear disclosure** when the agent is drawing from retrieved data vs. general knowledge\n- **Explicit \"I don't know\" pathways** that route to a verified data contact or reporting team\n- **Audit logging** of all statistical claims for periodic review\n\nThe goal isn't just reducing hallucination \u2014 it's building an agent that earns and maintains trust from clinicians and operational leaders who depend on the accuracy of what it surfaces.\n"}], "grading": {"run_id": "eval-2-healthcare-fabrication-without_skill", "assertions": [{"text": "Identifies the root failure mode as metric/data fabrication specifically, not a general accuracy problem", "passed": true, "evidence": "Names hallucinated statistics as the specific failure and explains the mechanism (model fills gaps with plausible-sounding numbers from training data patterns)."}, {"text": "Recommends a hard prohibitive rule (not soft guidance) \u2014 e.g., 'if you do not have a number in front of you, do not write a number'", "passed": false, "evidence": "Provides system prompt language ('You must only report statistics... explicitly provided to you') but does not articulate the hard rule principle clearly. The phrasing 'you must only' is still soft compared to 'if you do not have a number in front of you, do not write a number'."}, {"text": "Explains WHY soft guidance is insufficient vs. a hard rule", "passed": false, "evidence": "Does not make this distinction. RAG and temperature are recommended as primary fixes; the system prompt constraint is presented as a supporting measure that 'won't eliminate hallucination entirely on its own.'"}, {"text": "Places the data guardrail within a broader system prompt / behavioral rules framework", "passed": false, "evidence": "System prompt language is included but as one of four strategies (RAG, system prompt, structured output, temperature). It's not positioned within a behavioral rules architecture."}, {"text": "Does NOT recommend only a technical/infrastructure fix (RAG, temperature) as the primary solution", "passed": false, "evidence": "RAG is presented as 'the most effective structural fix' (Strategy 1). Temperature reduction is Strategy 4. The response leads with infrastructure solutions, not behavioral specification."}], "overall_notes": "Passes 1 of 5. Correctly identifies the problem but prescribes infrastructure solutions (RAG, temperature) as primary fixes rather than system prompt behavioral design. This is the opposite of what the skill teaches."}}, {"id": "eval-3-style-guide-with_skill", "prompt": "Our brand team gave me a style guide PDF but when I paste it into the system prompt the model still doesn't sound right. It's too formal in some places, too casual in others, and keeps adding these inspirational sign-offs we hate. What am I doing wrong?", "eval_id": 3, "outputs": [{"name": "response.md", "type": "text", "content": "# Why Your Style Guide Isn't Working \u2014 And How to Fix It\n\nThe problem isn't your style guide. The problem is that style guides are written for humans, and you're feeding one to a language model without translating it.\n\nHere's what's actually happening, and how to fix it.\n\n---\n\n## The Core Mismatch\n\nA style guide written for human communicators contains things like:\n\n> \"Our voice is warm, confident, and direct. We avoid corporate jargon. We lead with human impact.\"\n\nA human reader infers from that sentence. They draw on lived experience, editorial intuition, and hundreds of examples they've already absorbed. They know what \"warm but not casual\" sounds like because they've read it.\n\nA language model has no such inference engine for *your* brand. It has a default voice \u2014 shaped by training data that skews toward mid-market corporate prose \u2014 and style guide adjectives don't meaningfully override it. \"Warm and direct\" is what the model already thinks it's being. That's why it keeps sounding wrong: it's following your instructions as best it can while falling back on its defaults.\n\nThe formality swings, the casual drift, the inspirational sign-offs \u2014 those aren't failures to understand the guide. They're the model's baseline behaviors resurfacing when your instructions don't specify precisely enough to override them.\n\n---\n\n## What Actually Works: The Four-Part Fix\n\n### 1. Replace Adjectives with Substitution Tables\n\nThe single highest-leverage change you can make is converting tone adjectives into explicit vocabulary rules.\n\nStop: *\"Use a warm, human tone.\"*  \nStart: *\"Use 'associates,' never 'employees.' Use 'care team,' never 'department.' Use 'ministry,' not 'company.'\"*\n\nEvery row in a vocabulary table is testable. You can look at any response and know whether the rule was followed. \"Warm\" is not testable. \"Associates\" is.\n\nBuild a table with three columns:\n\n| Use this | Not this | Why it matters |\n|---|---|---|\n| Associates | Employees, staff | Signals belonging, not just employment |\n| Healing without harm | Zero-harm | Ascension's formal program name |\n| Care team | Department, unit | Relational framing over organizational |\n\nAim for 6\u201312 rows. Every row should cover a term the organization uses *in place of* an industry default \u2014 those are identity markers, not just preferences.\n\n### 2. Name the Failure Modes Exactly\n\nThe inspirational sign-offs you hate are a named failure mode. The model has a closing pattern instilled through training \u2014 it wants to end on uplift. Soft guidance (\"avoid sentimental closings\") won't suppress it. Named prohibitions will.\n\nWrite it as a hard rule, not guidance:\n\n> **Never append motivational or values-based sentiment to the end of a response.** If the answer is complete, stop. Do not add phrases like \"Together, we make a difference,\" \"This is how we live our mission,\" or similar closings. Responses end when the actionable content ends.\n\nThen add a correct/incorrect side-by-side example directly in the system prompt. Models respond to demonstrated patterns. The example makes the rule concrete in a way the prohibition alone doesn't.\n\nDo this for every failure mode you've observed:\n- Inspirational sign-offs \u2192 name the phrases, prohibit them explicitly\n- Formality drift \u2192 specify which contexts call for which register (and what \"too formal\" looks like in a concrete example)\n- Casual drift \u2192 name the specific words or sentence structures that signal too-casual\n\n### 3. Add Tone Calibration by Context, Not One Global Tone\n\n\"Too formal in some places, too casual in others\" usually means your system prompt has one global tone instruction and the model is misapplying it across contexts that require different registers.\n\nThe fix is a tone calibration table:\n\n| Situation | Register |\n|---|---|\n| Answering a policy question | Precise and confidence-inspiring \u2014 lead with the direct answer |\n| Surfacing unfavorable data | Factual, grounded; pair metrics with context, not softening |\n| Ambiguous or complex question | Transparent about uncertainty; state what's known and what the next step is |\n| Patient safety question | Especially careful and thorough; reinforce shared accountability |\n\nThis gives the model a signal it can act on: *\"Given the type of question I'm answering, which register applies?\"* One instruction for all situations is the root cause of the inconsistency you're seeing.\n\n### 4. Build a Scored Eval Set\n\nHere's the uncomfortable truth: without a fixed set of test queries and a scoring rubric, every prompt change is a guess. You adjust something, run a few test conversations, and think it's better \u2014 but you can't actually measure whether it improved or just shifted the failure patterns around.\n\nBuild 10\u201315 test queries covering:\n- Vocabulary compliance (questions where wrong terms are likely to appear)\n- Data handling (questions asking for metrics the agent may not have)\n- Scope boundaries (questions outside the agent's role)\n- Closing patterns (questions likely to generate sign-off language)\n- Identity questions (\"who are you\")\n\nScore each response on five dimensions, 3 points each (15 max per query):\n\n| Dimension | 3 pts | 2 pts | 1 pt |\n|---|---|---|---|\n| **Vocabulary** | All required terms; no prohibited terms | One minor slip | Multiple violations |\n| **Tone** | Matches register throughout | Mostly correct; minor drift | Significant drift or prohibited patterns |\n| **Data Integrity** | No fabricated metrics; honest redirects | Minor hedge without fabrication | Invented data presented as fact |\n| **Scope** | Out-of-scope explicitly declined with redirect | Redirected but not declined | Answered out-of-scope question |\n| **Actionability** | Closes with concrete next step | Vague close | No close or trailing sentiment |\n\nRun this against your current prompt. It will tell you exactly which failure modes are still active and in which query types \u2014 which tells you exactly what to fix next.\n\n---\n\n## Why the PDF Paste Fails Specifically\n\nStyle guide PDFs are built around a few structural problems when ingested as system prompt text:\n\n**Volume.** A 20-page style guide buries the 6 rules that actually matter inside explanatory prose, brand history, typography guidance, and design rationale. The model dilutes the signal. The vocabulary rules and behavioral prohibitions need to be *extracted* and placed in their own distinct section \u2014 not left embedded in paragraphs.\n\n**Aspiration vs. prohibition.** Style guides are written to inspire. They describe what the brand *is* \u2014 not what the AI should *not do*. The model needs both. The prohibitions are what suppress the default behaviors.\n\n**No examples.** Good style guides have examples written for human readers \u2014 full paragraphs demonstrating voice. Those examples help humans but don't provide the before/after contrasts a model needs. You need explicit wrong-version/right-version pairs for the failure modes you care about.\n\n**Missing context triggers.** Style guides rarely tell communicators when different registers apply \u2014 humans use judgment. Models need explicit triggers. \"Use this tone in situation X\" is what makes register consistent across question types.\n\n---\n\n## What to Do Next\n\n1. Pull out every vocabulary substitution your style guide implies (explicit and implicit) and build the table.\n2. Write out the three or four failure modes you've already observed \u2014 the sign-offs, the formality problems \u2014 and write named prohibitions for each with examples.\n3. Add a tone calibration table that maps question type to register.\n4. Build 10 test queries and score your current prompt.\n5. Make one targeted change at a time, re-run the full eval, and track the scores.\n\nThe style guide is the right starting material. It just needs to be translated from \"instructions for a human writer\" into \"behavioral specifications for a language model\" \u2014 and that translation is specific, mechanical work, not vibe adjustment.\n"}], "grading": {"run_id": "eval-3-style-guide-with_skill", "assertions": [{"text": "Diagnoses the core problem: style guides describe aspirations, not behavioral specifications", "passed": true, "evidence": "Opens with this diagnosis: 'style guides are written for humans... A language model has no such inference engine for your brand.' Explains WHY adjectives like 'warm and direct' fail."}, {"text": "Recommends extracting vocabulary substitution pairs instead of pasting tone adjectives", "passed": true, "evidence": "Fix #1 explicitly: 'Replace Adjectives with Substitution Tables' with the 'Stop / Start' framing and an example 3-row table."}, {"text": "Addresses the specific 'inspirational sign-off' problem with a named prohibition (not just 'avoid sentimental closings')", "passed": true, "evidence": "Fix #2 names the failure mode ('inspirational sign-offs you hate') and writes a hard prohibition: 'Never append motivational or values-based sentiment...' with named example phrases to suppress."}, {"text": "Recommends building a scored eval set or test queries to verify improvements across iterations", "passed": true, "evidence": "Fix #4 explicitly calls for a scored eval set with 10-15 queries, names the 5 dimension rubric, and explains why guesswork without a fixed eval set fails."}, {"text": "Gives actionable, structured next steps \u2014 not just a diagnosis", "passed": true, "evidence": "Four concrete fixes with clear what-to-do-instead framing. Not just diagnosis \u2014 each section ends with an implementable action."}], "overall_notes": "Passes all 5. The skill correctly reframes the problem from 'pasting PDF doesn't work' to a four-part fix with concrete deliverables."}}, {"id": "eval-3-style-guide-without_skill", "prompt": "Our brand team gave me a style guide PDF but when I paste it into the system prompt the model still doesn't sound right. It's too formal in some places, too casual in others, and keeps adding these inspirational sign-offs we hate. What am I doing wrong?", "eval_id": 3, "outputs": [{"name": "response.md", "type": "text", "content": "# Why Your Brand Voice Isn't Landing \u2014 and How to Fix It\n\nPasting a PDF into a system prompt is a common starting point, but it rarely produces consistent results on its own. Here's what's likely going wrong and what to do instead.\n\n---\n\n## The Core Problem: Style Guides Are Written for Humans, Not Models\n\nA brand style guide is designed for a human creative professional who will read it once, internalize it over time, and apply judgment. It typically:\n\n- Uses narrative prose to describe abstract qualities (\"warm but authoritative,\" \"conversational yet expert\")\n- Provides a handful of illustrative examples\n- Relies on the reader already knowing what \"too casual\" or \"too formal\" feels like\n\nLanguage models don't internalize \u2014 they pattern-match. When you paste a 20-page PDF, the model treats it as one large block of context it must reconcile with everything else it knows about language. Abstract adjectives like \"approachable\" or \"professional\" are interpreted based on the model's broad training data, not your specific brand's definition of those words. That's why the output drifts.\n\n---\n\n## Specific Reasons You're Seeing These Symptoms\n\n**Too formal in some places, too casual in others:**\nThe model is averaging across your style guide's prose rather than applying a stable, coherent register. If your guide uses formal language to *describe* casual tone, the model may pick up the formal description rather than the intended output. Inconsistency is the natural result.\n\n**Inspirational sign-offs you hate:**\nThis is a default model behavior bleeding through. Models trained on large corpora learn that certain contexts \u2014 helping someone, answering a question, providing information \u2014 are commonly followed by affirmative, encouraging closings. Unless your system prompt *explicitly prohibits* this behavior with a concrete instruction, the model will fall back on it. Vague guidance like \"avoid clich\u00e9s\" is not enough.\n\n---\n\n## What to Do Instead\n\n### 1. Replace Abstract Descriptions with Explicit Rules\n\nDon't say: *\"Our tone is warm and professional.\"*\n\nDo say: *\"Write in second person. Use short sentences \u2014 typically under 20 words. Do not use exclamation points. Do not use the words 'leverage,' 'synergy,' or 'journey.'\"*\n\nThe more your instructions look like a checklist the model can apply mechanically, the more consistent the output.\n\n### 2. Prohibit Specific Behaviors Explicitly\n\nFor the sign-off problem specifically: add a hard negative rule.\n\nExample: *\"Do not end responses with inspirational statements, affirmations, or encouragement. End with the final piece of substantive information or a direct next step.\"*\n\nGive the model a concrete alternative, not just a prohibition. \"Don't do X\" works better when paired with \"instead, do Y.\"\n\n### 3. Show, Don't Just Tell \u2014 Use Annotated Examples\n\nInclude 3\u20135 examples of actual output in your system prompt: a before (wrong) and after (right) pair, with a brief note explaining what was corrected.\n\n```\nWRONG: \"As you move forward on this journey, remember that our team is here to support your growth every step of the way!\"\n\nRIGHT: \"If you have follow-up questions, contact the support team at [contact].\"\n\nNOTE: No inspirational framing. End with the actionable information.\n```\n\nExamples anchor the model to a specific output pattern far more reliably than descriptive guidance alone.\n\n### 4. Separate Voice Rules from Content Rules\n\nPasting an entire style guide conflates brand voice with visual standards, logo usage, color palettes, and other things the model cannot act on. That noise dilutes the signal. Extract only the voice-relevant content \u2014 word choices, sentence structure, tone descriptors, forbidden phrases, example copy \u2014 and use that as your system prompt input. Aim for focused and scannable over comprehensive.\n\n### 5. Test and Iterate on Specific Failure Modes\n\nRather than trying to fix \"tone\" broadly, isolate each problem:\n\n- Run a prompt specifically designed to trigger the sign-off behavior, verify the fix works, then move on.\n- Test edge cases: Does the voice hold when the model is uncertain? When it's delivering bad news? When answering a short factual question?\n\nVoice consistency tends to break at the edges. Test there deliberately.\n\n---\n\n## A Quick Diagnostic\n\nLook at your current system prompt and ask:\n\n- Does it contain specific word-level prohibitions (forbidden words/phrases)? If not, add them.\n- Does it include at least one concrete \"right vs. wrong\" output example? If not, add one.\n- Does it tell the model exactly how to end a response? If not, add that.\n- Is it longer than ~800 words of voice guidance? If yes, cut it down \u2014 you're likely diluting the key rules.\n\n---\n\n## Summary\n\nThe style guide PDF is a good source document, not a ready-to-use system prompt. Your job is to translate it: extract the rules that can be stated as specific, mechanical instructions; add explicit prohibitions for the behaviors you hate; and ground everything with real output examples. That translation work is what makes brand voice stick.\n"}], "grading": {"run_id": "eval-3-style-guide-without_skill", "assertions": [{"text": "Diagnoses the core problem: style guides describe aspirations, not behavioral specifications", "passed": true, "evidence": "Correctly identifies 'Style Guides Are Written for Humans, Not Models' and explains pattern-matching vs. internalization. Good diagnosis."}, {"text": "Recommends extracting vocabulary substitution pairs instead of pasting tone adjectives", "passed": false, "evidence": "Recommends replacing abstract descriptions with explicit rules but frames them as sentence-structure rules ('under 20 words', 'no exclamation points') rather than vocabulary substitution tables. No table format suggested."}, {"text": "Addresses the specific 'inspirational sign-off' problem with a named prohibition (not just 'avoid sentimental closings')", "passed": false, "evidence": "Has a 'WRONG/RIGHT/NOTE' example which is good, but the rule itself ('Do not end responses with inspirational statements') is generic, not naming specific phrases to suppress. The skill would name exact phrases."}, {"text": "Recommends building a scored eval set or test queries to verify improvements across iterations", "passed": false, "evidence": "No mention of an eval set, scoring rubric, or systematic iteration tracking. The response ends without recommending any measurement mechanism."}, {"text": "Gives actionable, structured next steps \u2014 not just a diagnosis", "passed": true, "evidence": "Four concrete fixes (explicit rules, prohibit behaviors, show examples, test/iterate) with example text for each. Actionable, though less structured than the with-skill version."}], "overall_notes": "Passes 2 of 5. Diagnoses the problem well and gives some actionable advice, but misses the vocabulary substitution table format, specific phrase-level prohibitions, and the scored eval set \u2014 the three most discriminating elements of the skill."}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"metadata": {"skill_name": "encode-brand-voice", "skill_path": "<path/to/skill>", "executor_model": "<model-name>", "analyzer_model": "<model-name>", "timestamp": "2026-05-26T22:05:37Z", "evals_run": [1, 2, 3], "runs_per_configuration": 3}, "runs": [{"eval_id": 1, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5, "time_seconds": 0.0, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Includes a vocabulary substitution table with at least one forbidden-term/preferred-term pair", "passed": true, "evidence": "Has a 10-row table with Use This / Not This / Why It Matters columns, covering 'clients' not 'customers', 'counsel/advise' not 'leverage', 'follow up' not 'circle back', etc."}, {"text": "Recommends a concrete system prompt structure, not just general advice", "passed": true, "evidence": "Explicitly says to write rules as behavioral specifications for the system prompt, distinguishes hard rules from tone guidance. Provides actual system-prompt-ready rule text."}, {"text": "Addresses the 'actionable close' requirement \u2014 every response must end with a next step", "passed": true, "evidence": "Rule 2 is explicitly about this: 'Every Response Closes With a Concrete Next Step' with correct/incorrect examples side by side."}, {"text": "Identifies at least one specific failure mode (e.g., corporate jargon, missing closes) and writes a hard rule for it", "passed": true, "evidence": "Two failure modes identified: 'Corporate vocabulary bleed' and 'Vague or sentiment-laden closes'. Both have hard rule language written for the system prompt."}, {"text": "Recommends building a scored evaluation set (or test queries) to verify compliance", "passed": true, "evidence": "Step 4 explicitly recommends a scored eval set with 10-15 queries and a 5-dimension scoring rubric (Vocabulary, Tone, Data Integrity, Scope, Actionability)."}], "notes": []}, {"eval_id": 2, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5, "time_seconds": 0.0, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Identifies the root failure mode as metric/data fabrication specifically, not a general accuracy problem", "passed": true, "evidence": "Opens by naming 'data fabrication' as a specific failure mode, distinguishes it from general inaccuracy, and explains WHY it happens (model trained to be helpful fills gaps with plausible numbers)."}, {"text": "Recommends a hard prohibitive rule (not soft guidance) \u2014 e.g., 'if you do not have a number in front of you, do not write a number'", "passed": true, "evidence": "Step 3 writes the exact hard rule: 'If you do not have a number in front of you, do not write a number.' Labeled explicitly as a behavioral specification, not a style suggestion."}, {"text": "Explains WHY soft guidance is insufficient vs. a hard rule", "passed": true, "evidence": "'Soft tone guidance leaves the model interpreting. Hard behavioral rules leave the model executing.' Also explains the two root causes: no rule prohibiting fabrication + rule written as tone guidance rather than prohibition."}, {"text": "Places the data guardrail within a broader system prompt / behavioral rules framework", "passed": true, "evidence": "The data fabrication rule is presented as one of several hard behavioral rules within a complete system prompt structure, including vocabulary table, context-specific tone calibration, and eval set."}, {"text": "Does NOT recommend only a technical/infrastructure fix (RAG, temperature) as the primary solution", "passed": true, "evidence": "No mention of RAG or temperature reduction. Focuses entirely on system prompt behavioral rules as the fix. Technical solutions are not offered as alternatives."}], "notes": []}, {"eval_id": 3, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5, "time_seconds": 0.0, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Diagnoses the core problem: style guides describe aspirations, not behavioral specifications", "passed": true, "evidence": "Opens with this diagnosis: 'style guides are written for humans... A language model has no such inference engine for your brand.' Explains WHY adjectives like 'warm and direct' fail."}, {"text": "Recommends extracting vocabulary substitution pairs instead of pasting tone adjectives", "passed": true, "evidence": "Fix #1 explicitly: 'Replace Adjectives with Substitution Tables' with the 'Stop / Start' framing and an example 3-row table."}, {"text": "Addresses the specific 'inspirational sign-off' problem with a named prohibition (not just 'avoid sentimental closings')", "passed": true, "evidence": "Fix #2 names the failure mode ('inspirational sign-offs you hate') and writes a hard prohibition: 'Never append motivational or values-based sentiment...' with named example phrases to suppress."}, {"text": "Recommends building a scored eval set or test queries to verify improvements across iterations", "passed": true, "evidence": "Fix #4 explicitly calls for a scored eval set with 10-15 queries, names the 5 dimension rubric, and explains why guesswork without a fixed eval set fails."}, {"text": "Gives actionable, structured next steps \u2014 not just a diagnosis", "passed": true, "evidence": "Four concrete fixes with clear what-to-do-instead framing. Not just diagnosis \u2014 each section ends with an implementable action."}], "notes": []}, {"eval_id": 1, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.4, "passed": 2, "failed": 3, "total": 5, "time_seconds": 0.0, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Includes a vocabulary substitution table with at least one forbidden-term/preferred-term pair", "passed": true, "evidence": "Has a small table with 'Clients/Customers', 'Matter/Case', and a placeholder row. Present but minimal \u2014 only 3 rows vs. 10 in the with-skill version."}, {"text": "Recommends a concrete system prompt structure, not just general advice", "passed": false, "evidence": "Step 5 says 'it gets built into the AI's system prompt' but gives no structure: no sections, no hard rules format, no examples of what goes in the prompt."}, {"text": "Addresses the 'actionable close' requirement \u2014 every response must end with a next step", "passed": true, "evidence": "Step 3 explicitly addresses this as 'a structural rule, not just a tone preference' with three acceptable close patterns."}, {"text": "Identifies at least one specific failure mode (e.g., corporate jargon, missing closes) and writes a hard rule for it", "passed": false, "evidence": "Failure modes are mentioned in passing ('corporate filler language') but no hard rule is written. The guidance remains in soft/aspirational form."}, {"text": "Recommends building a scored evaluation set (or test queries) to verify compliance", "passed": false, "evidence": "Step 4 recommends 10-15 test questions but there is no scoring rubric, no dimensions, no way to compare prompt iterations. 'Compare it against your ideal' is subjective."}], "notes": []}, {"eval_id": 2, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.2, "passed": 1, "failed": 4, "total": 5, "time_seconds": 0.0, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Identifies the root failure mode as metric/data fabrication specifically, not a general accuracy problem", "passed": true, "evidence": "Names hallucinated statistics as the specific failure and explains the mechanism (model fills gaps with plausible-sounding numbers from training data patterns)."}, {"text": "Recommends a hard prohibitive rule (not soft guidance) \u2014 e.g., 'if you do not have a number in front of you, do not write a number'", "passed": false, "evidence": "Provides system prompt language ('You must only report statistics... explicitly provided to you') but does not articulate the hard rule principle clearly. The phrasing 'you must only' is still soft compared to 'if you do not have a number in front of you, do not write a number'."}, {"text": "Explains WHY soft guidance is insufficient vs. a hard rule", "passed": false, "evidence": "Does not make this distinction. RAG and temperature are recommended as primary fixes; the system prompt constraint is presented as a supporting measure that 'won't eliminate hallucination entirely on its own.'"}, {"text": "Places the data guardrail within a broader system prompt / behavioral rules framework", "passed": false, "evidence": "System prompt language is included but as one of four strategies (RAG, system prompt, structured output, temperature). It's not positioned within a behavioral rules architecture."}, {"text": "Does NOT recommend only a technical/infrastructure fix (RAG, temperature) as the primary solution", "passed": false, "evidence": "RAG is presented as 'the most effective structural fix' (Strategy 1). Temperature reduction is Strategy 4. The response leads with infrastructure solutions, not behavioral specification."}], "notes": []}, {"eval_id": 3, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.4, "passed": 2, "failed": 3, "total": 5, "time_seconds": 0.0, "tokens": 0, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Diagnoses the core problem: style guides describe aspirations, not behavioral specifications", "passed": true, "evidence": "Correctly identifies 'Style Guides Are Written for Humans, Not Models' and explains pattern-matching vs. internalization. Good diagnosis."}, {"text": "Recommends extracting vocabulary substitution pairs instead of pasting tone adjectives", "passed": false, "evidence": "Recommends replacing abstract descriptions with explicit rules but frames them as sentence-structure rules ('under 20 words', 'no exclamation points') rather than vocabulary substitution tables. No table format suggested."}, {"text": "Addresses the specific 'inspirational sign-off' problem with a named prohibition (not just 'avoid sentimental closings')", "passed": false, "evidence": "Has a 'WRONG/RIGHT/NOTE' example which is good, but the rule itself ('Do not end responses with inspirational statements') is generic, not naming specific phrases to suppress. The skill would name exact phrases."}, {"text": "Recommends building a scored eval set or test queries to verify improvements across iterations", "passed": false, "evidence": "No mention of an eval set, scoring rubric, or systematic iteration tracking. The response ends without recommending any measurement mechanism."}, {"text": "Gives actionable, structured next steps \u2014 not just a diagnosis", "passed": true, "evidence": "Four concrete fixes (explicit rules, prohibit behaviors, show examples, test/iterate) with example text for each. Actionable, though less structured than the with-skill version."}], "notes": []}], "run_summary": {"with_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "time_seconds": {"mean": 0.0, "stddev": 0.0, "min": 0.0, "max": 0.0}, "tokens": {"mean": 0.0, "stddev": 0.0, "min": 0, "max": 0}}, "without_skill": {"pass_rate": {"mean": 0.3333, "stddev": 0.1155, "min": 0.2, "max": 0.4}, "time_seconds": {"mean": 0.0, "stddev": 0.0, "min": 0.0, "max": 0.0}, "tokens": {"mean": 0.0, "stddev": 0.0, "min": 0, "max": 0}}, "delta": {"pass_rate": "+0.67", "time_seconds": "+0.0", "tokens": "+0"}}, "notes": []}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

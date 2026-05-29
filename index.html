@@ -436,6 +436,7 @@
 
 <nav class="section-nav">
     <div class="nav-inner">
+        <a href="presentation.html" style="color:var(--teal,#009498);font-weight:700">▶ Presentation</a>
         <a href="#artifacts">Artifacts</a>
         <a href="#ui-skin">UI Skin</a>
         <a href="#findings">Key Findings</a>
@@ -449,7 +450,24 @@
     <section id="artifacts">
         <div class="section-label">Deliverables</div>
         <h2>Research Artifacts</h2>
-        <p>Four files make up the full research bundle. The clinical AI interface is the front-end deliverable that wraps the agent in Ascension's visual identity; the prompt evolution tracker documents how the system prompt was tested and refined; the system prompt is the deployable Vertex AI instruction; and the brand voice research document is the foundational analysis behind all three.</p>
+        <p>Six files make up the full research bundle — from the presentation summarizing the methodology to the deployable system prompt and a reusable skill for applying brand voice encoding to any LLM (large language model) agent.</p>
+
+        <!-- Presentation -->
+        <div class="artifact-card">
+            <div class="card-top">
+                <div class="card-icon icon-html">🎞️</div>
+                <div class="card-meta">
+                    <div class="card-type">Presentation &mdash; HTML</div>
+                    <h3>Brand Voice Engineering — The Full Story</h3>
+                    <p>
+                        A 17-slide web presentation covering the end-to-end methodology: brand research, key learnings, agent setup, iterative scoring, and applicability to other organizations. Each slide has an explore mode (full prose) and a present mode (condensed bullets for live delivery). Keyboard and touch navigation with URL-addressable slides.
+                    </p>
+                </div>
+            </div>
+            <div class="card-action">
+                <a href="presentation.html" class="btn btn-primary">Open Presentation</a>
+            </div>
+        </div>
 
         <!-- Clinical AI UI Skin -->
         <div class="artifact-card">
@@ -517,6 +535,24 @@
             </div>
             <div class="card-action">
                 <a href="Ascension Brand Voice Research.docx" download class="btn btn-primary">Download .docx</a>
+            </div>
+        </div>
+
+        <!-- Encode Brand Voice Skill -->
+        <div class="artifact-card">
+            <div class="card-top">
+                <div class="card-icon icon-md">🛠️</div>
+                <div class="card-meta">
+                    <div class="card-type">Reusable Skill &mdash; Claude Cowork</div>
+                    <h3>encode-brand-voice — Installable Claude Skill</h3>
+                    <p>
+                        A packaged Claude Cowork skill built from this project's 5-step methodology. Contains a master skill and five individual step skills (research, vocabulary, hard rules, eval set, iterate) — each independently triggerable. Install it to encode any organization's brand voice into an LLM (large language model) agent system prompt, complete with vocabulary substitution tables, named behavioral prohibitions, and a scored evaluation rubric. Tested at 100% pass rate vs. 33% for baseline Claude.
+                    </p>
+                </div>
+            </div>
+            <div class="card-action">
+                <a href="encode-brand-voice-review.html" class="btn btn-secondary">View Eval Results</a>
+                <a href="encode-brand-voice.skill" download class="btn btn-primary">Download .skill</a>
             </div>
         </div>
     </section>

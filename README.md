@@ -10,12 +10,32 @@ A structured research and testing effort to define, validate, and encode the Asc
 
 ## What's in this repo
 
+**Web artifacts**
+
 | File | Description |
 |---|---|
 | [`index.html`](https://wwtdigital.github.io/agent-brand-research/) | Landing page — project summary, key findings, and links to all artifacts |
+| [`presentation.html`](https://wwtdigital.github.io/agent-brand-research/presentation.html) | 17-slide methodology deck — brand research through scored eval, with explore and present modes |
+| [`ascension-clinical-ai.html`](https://wwtdigital.github.io/agent-brand-research/ascension-clinical-ai.html) | Ascension-branded Vertex AI chat interface skin — full brand color tokens, disclaimer banner, quick-start prompt cards |
 | [`prompt_evolution.html`](https://wwtdigital.github.io/agent-brand-research/prompt_evolution.html) | Interactive prompt evolution tracker — word-level diffs, per-query scores across 5 runs |
+| [`encode-brand-voice-review.html`](https://wwtdigital.github.io/agent-brand-research/encode-brand-voice-review.html) | Eval viewer for the encode-brand-voice skill — with-skill vs. baseline comparison, 100% vs. 33% pass rate |
+
+**Deployable artifacts**
+
+| File | Description |
+|---|---|
 | [`system_prompt.md`](https://wwtdigital.github.io/agent-brand-research/system_prompt.md) | Final Ascension Clinical Agent system instruction (Vertex AI Gemini format) |
-| `Ascension Brand Voice Research.docx` | WWT brand voice research — public vs. clinical voice, vocabulary, tone by context |
+| [`encode-brand-voice.skill`](https://wwtdigital.github.io/agent-brand-research/encode-brand-voice.skill) | Installable Claude Cowork skill — master + 5 step skills for encoding any brand voice into an LLM agent |
+| `Ascension Brand Voice Research.docx` | WWT brand voice research — public vs. clinical voice, vocabulary, faith integration, tone by context |
+
+**Tooling**
+
+| File | Description |
+|---|---|
+| `score_report.py` | Rule-based scorer — evaluates agent responses across 5 dimensions (Vocabulary, Tone, Data Integrity, Scope, Actionability) |
+| `compare.py` | A/B system prompt comparison — runs test queries through Gemini with and without a system prompt, produces scored HTML reports |
+| `fix_lists.py` | Post-processor for A/B HTML reports — corrects list formatting in table cells |
+| `API_Reference.md` | Vertex AI / Google AI Studio API reference used during development |
 
 ---
 
